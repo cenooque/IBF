@@ -1,0 +1,28 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h1>Relatório de aniversariantes</h1>
+<form method="get">
+  <label for="mes">Mês:</label>
+  <select name="mes" id="mes">
+    {% for n, nome in meses %}
+      <option value="{{ n }}" {% if mes == n %}selected{% endif %}>{{ nome }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit">Filtrar</button>
+</form>
+<table>
+  <thead><tr><th>Nome</th><th>Data de nascimento</th><th>Telefone</th><th>Cidade</th></tr></thead>
+  <tbody>
+  {% for pessoa in pessoas %}
+    <tr>
+      <td>{{ pessoa.nome_completo }}</td>
+      <td>{{ pessoa.data_nascimento|date:"d/m" }}</td>
+      <td>{{ pessoa.telefone|default:"—" }}</td>
+      <td>{{ pessoa.cidade|default:"—" }}</td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="4">Nenhum aniversariante encontrado neste mês.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,338 @@
+{% load acessos_tags %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ titulo_pagina }}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", Arial, Helvetica, sans-serif; }
+    body { background: #eceff1; color: #263238; display: flex; min-height: 100vh; font-size: 13px; }
+
+    .sidebar { width: 235px; background: #212529; color: #cfd8dc; display: flex; flex-direction: column; flex-shrink: 0; }
+    .brand { background: #181a1d; color: #fff; padding: 12px 14px; font-weight: 700; font-size: 14px; border-bottom: 1px solid #2c3136; }
+    .menu-search { padding: 10px; border-bottom: 1px solid #2c3136; }
+    .menu-search input { width: 100%; background: #2c3034; border: 1px solid #495057; color: #fff; padding: 6px 8px; border-radius: 3px; font-size: 12px; }
+    .nav-group-title { font-size: 11px; text-transform: uppercase; color: #90a4ae; padding: 10px 14px 4px; font-weight: 700; }
+    .nav-list { list-style: none; }
+    .nav-list a, .nav-list button.nav-toggle {
+      display: flex; align-items: center; justify-content: space-between; width: 100%;
+      padding: 8px 14px; color: #cfd8dc; text-decoration: none; background: transparent; border: 0;
+      cursor: pointer; font-size: 13px; text-align: left;
+    }
+    .nav-list a:hover, .nav-list a.active, .nav-list button.nav-toggle:hover { background: #c62828; color: #fff; }
+    .submenu { list-style: none; background: #181a1d; }
+    .submenu.collapsed { display: none; }
+    .submenu a { padding: 6px 14px 6px 28px; font-size: 12px; }
+    .sidebar-footer { margin-top: auto; border-top: 1px solid #2c3136; padding: 10px 14px; }
+    .btn-logout { width: 100%; padding: 7px 10px; background: #37474f; color: #fff; border: 0; border-radius: 3px; cursor: pointer; font-weight: 600; }
+    .btn-logout:hover { background: #c62828; }
+
+    .main-wrap { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .topbar { background: #343a40; color: #fff; padding: 6px 14px; display: flex; align-items: center; gap: 10px; font-size: 12px; }
+    .tab-pill { background: #212529; padding: 4px 10px; border-radius: 2px; }
+
+    .content { padding: 16px 20px; background: #fff; flex: 1; }
+    .page-heading { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+    .page-heading h1 { font-size: 20px; font-weight: 500; color: #212529; }
+    .help-badge { background: #212529; color: #fff; width: 18px; height: 18px; border-radius: 3px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+
+    .toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn-dark { background: #2c3034; color: #fff; border: 1px solid #212529; padding: 6px 12px; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: 600; }
+    .btn-grey { background: #6c757d; color: #fff; border: 1px solid #5a6268; padding: 6px 12px; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: 600; }
+    .btn-confirm { background: #b71c1c; color: #fff; border: 1px solid #8e0000; padding: 7px 16px; border-radius: 3px; cursor: pointer; font-size: 13px; font-weight: 600; margin-top: 10px; }
+    .btn-confirm:hover { background: #8e0000; }
+
+    .filter-panel { background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px 12px; margin-bottom: 12px; display: none; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .filter-panel.open { display: flex; }
+    .filter-panel select, .filter-panel input { padding: 5px 8px; border: 1px solid #ced4da; border-radius: 3px; font-size: 12px; }
+
+    .batch-box { margin-bottom: 10px; }
+    .batch-title { font-weight: 700; color: #212529; margin-bottom: 4px; font-size: 12px; }
+    .batch-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding-left: 6px; margin-bottom: 6px; }
+    .batch-row label { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; font-size: 12px; }
+
+    .grid-top-bar { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .grid-top-bar input { padding: 4px 8px; border: 1px solid #adb5bd; border-radius: 2px; width: 220px; font-size: 12px; }
+
+    .table-wrap { border: 1px solid #dee2e6; max-height: 440px; overflow: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    thead th { position: sticky; top: 0; background: #2c3034; color: #fff; font-weight: 600; padding: 7px 8px; text-align: left; border-right: 1px solid #3f464c; }
+    tbody td { padding: 6px 8px; border-bottom: 1px solid #e9ecef; border-right: 1px solid #f1f3f5; }
+    tbody tr:hover { background: #f1f5f9; }
+    .col-center { text-align: center; width: 90px; }
+    .col-sel { text-align: center; width: 46px; }
+    .chk-red { accent-color: #c62828; width: 14px; height: 14px; cursor: pointer; }
+    .footer-count { font-size: 12px; color: #495057; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  {% if request.user.is_superuser or request.user|pode_ver:"PAINEL_GERAL" or request.user|pode_ver:"PESSOAS_CADASTRO" or request.user|pode_ver:"CARGOS_CADASTRO" or request.user|pode_ver:"CONTAS_RECEBER" or request.user|pode_ver:"CONTAS_PAGAR" or request.user|pode_ver:"FORNECEDORES" or request.user|pode_ver:"CENTRO_CUSTO" or request.user|pode_ver:"PLANO_CONTAS" or request.user|pode_ver:"USUARIOS_CADASTRO" or request.user|pode_ver:"LIBERACAO_ACESSOS" %}
+    <aside class="sidebar">
+      <div class="brand">IBF — Gestão da Igreja</div>
+      <div class="menu-search">
+        <input type="text" id="menuFiltro" placeholder="Pesquisar menu..." onkeyup="filtrarMenuLateral()">
+      </div>
+
+      {% if request.user|pode_ver:"PAINEL_GERAL" or request.user|pode_ver:"PESSOAS_CADASTRO" or request.user|pode_ver:"CARGOS_CADASTRO" %}
+        <div class="nav-group-title">Principal</div>
+        <ul class="nav-list" id="listaMenuLateral">
+          {% if request.user|pode_ver:"PAINEL_GERAL" %}
+            <li><a href="/">Painel Geral</a></li>
+          {% endif %}
+          {% if request.user|pode_ver:"PESSOAS_CADASTRO" or request.user|pode_ver:"CARGOS_CADASTRO" %}
+            <li>
+              <button type="button" class="nav-toggle" onclick="toggleSubmenu(this)">
+                <span>Pessoas</span>
+                <span class="arrow">▾</span>
+              </button>
+              <ul class="submenu">
+                {% if request.user|pode_ver:"PESSOAS_CADASTRO" %}
+                  <li><a href="{% url 'people:lista' %}">Cadastro de Pessoas</a></li>
+                {% endif %}
+                {% if request.user|pode_ver:"CARGOS_CADASTRO" %}
+                  <li><a href="{% url 'people:cargo_lista' %}">Cargos</a></li>
+                {% endif %}
+                {% if request.user|pode_incluir:"CARGOS_CADASTRO" %}
+                  <li><a href="{% url 'people:cargo_criar' %}">Novo Cargo</a></li>
+                {% endif %}
+              </ul>
+            </li>
+          {% endif %}
+        </ul>
+      {% endif %}
+
+      {% if request.user.is_superuser or request.user|pode_ver:"CONTAS_RECEBER" or request.user|pode_ver:"CONTAS_PAGAR" or request.user|pode_ver:"FORNECEDORES" or request.user|pode_ver:"CENTRO_CUSTO" or request.user|pode_ver:"PLANO_CONTAS" %}
+        <div class="nav-group-title">Financeiro</div>
+        <ul class="nav-list">
+          <li>
+            <button type="button" class="nav-toggle" onclick="toggleSubmenu(this)">
+              <span>Financeiro</span>
+              <span class="arrow">▾</span>
+            </button>
+            <ul class="submenu">
+              {% if request.user.is_superuser or request.user|pode_ver:"CONTAS_RECEBER" %}
+                <li><a href="/admin/finance/contareceber/">Contas a Receber</a></li>
+              {% endif %}
+              {% if request.user.is_superuser or request.user|pode_ver:"CONTAS_PAGAR" %}
+                <li><a href="/admin/finance/contapagar/">Contas a Pagar</a></li>
+              {% endif %}
+              {% if request.user.is_superuser or request.user|pode_ver:"FORNECEDORES" %}
+                <li><a href="/admin/finance/fornecedor/">Fornecedores</a></li>
+              {% endif %}
+              {% if request.user.is_superuser or request.user|pode_ver:"CENTRO_CUSTO" %}
+                <li><a href="{% url 'finance:centro_custo' %}">Centro de Custo</a></li>
+              {% endif %}
+              {% if request.user.is_superuser or request.user|pode_ver:"PLANO_CONTAS" %}
+                <li><a href="{% url 'finance:plano_contas' %}">Plano de Contas</a></li>
+              {% endif %}
+            </ul>
+          </li>
+        </ul>
+      {% endif %}
+
+      {% if request.user.is_superuser or request.user|pode_ver:"USUARIOS_CADASTRO" or request.user|pode_ver:"LIBERACAO_ACESSOS" %}
+        <div class="nav-group-title">Sistema</div>
+        <ul class="nav-list">
+          {% if request.user|pode_ver:"USUARIOS_CADASTRO" %}
+            <li><a href="{% url 'core:usuario_lista' %}">Usuário</a></li>
+          {% endif %}
+          {% if request.user|pode_ver:"LIBERACAO_ACESSOS" %}
+            <li><a href="{% url 'core:liberacao_acessos' %}" class="active">Liberação de Acessos</a></li>
+          {% endif %}
+          {% if request.user.is_superuser %}
+            <li><a href="/admin/">Django Admin</a></li>
+          {% endif %}
+        </ul>
+      {% endif %}
+
+      <div class="sidebar-footer">
+        {% if user.is_authenticated %}
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-logout">Sair ({{ user.username }})</button>
+          </form>
+        {% endif %}
+      </div>
+    </aside>
+  {% endif %}
+
+  <div class="main-wrap">
+    <div class="topbar">
+      <span>☰</span>
+      <span class="tab-pill">Liberação de Acessos</span>
+    </div>
+
+    <div class="content">
+      <div class="page-heading">
+        <h1>Liberação de Acessos</h1>
+        <span class="help-badge">?</span>
+      </div>
+
+      <div class="toolbar">
+        <button type="button" class="btn-dark" onclick="document.getElementById('painelFiltros').classList.toggle('open')">
+          Filtros
+        </button>
+        <button type="button" class="btn-grey" onclick="abrirCopia()">
+          Copiar Acessos
+        </button>
+      </div>
+
+      <form method="get" id="painelFiltros" class="filter-panel {% if usuario_selecionado %}open{% endif %}">
+        <div>
+          <label for="filtroUsuario"><strong>Usuário:</strong></label>
+          <select name="usuario" id="filtroUsuario" onchange="this.form.submit()">
+            {% for u in usuarios %}
+              <option value="{{ u.pk }}" {% if usuario_selecionado and u.pk == usuario_selecionado.pk %}selected{% endif %}>
+                {{ u.pk|stringformat:"04d" }} — {{ u.username }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <input type="text" name="q" value="{{ pesquisa }}" placeholder="Filtrar tela...">
+          <button type="submit" class="btn-dark">Aplicar</button>
+        </div>
+      </form>
+
+      <form method="post" id="formPermissoes">
+        {% csrf_token %}
+        <input type="hidden" name="usuario_id" value="{{ usuario_selecionado.pk }}">
+        <input type="hidden" name="acao" id="acaoForm" value="confirmar">
+        <input type="hidden" name="origem_usuario_id" id="origemUsuarioId" value="">
+
+        <div class="batch-box">
+          <div class="batch-title">Selecionar todos os Acessos:</div>
+          <div class="batch-row">
+            <label>
+              <input type="checkbox" id="chkTodos" class="chk-red" onchange="selecionarTodasLinhas(this.checked)">
+              Todos
+            </label>
+          </div>
+
+          <div class="batch-title">Aplicar a todos selecionados:</div>
+          <div class="batch-row">
+            <label><input type="checkbox" class="chk-red" onchange="aplicarColunaSelecionados('consultar', this.checked)"> Consultar</label>
+            <label><input type="checkbox" class="chk-red" onchange="aplicarColunaSelecionados('alterar', this.checked)"> Alterar</label>
+            <label><input type="checkbox" class="chk-red" onchange="aplicarColunaSelecionados('excluir', this.checked)"> Excluir</label>
+            <label><input type="checkbox" class="chk-red" onchange="aplicarColunaSelecionados('incluir', this.checked)"> Incluir</label>
+          </div>
+        </div>
+
+        <div class="grid-top-bar">
+          <label for="pesquisaGrade">Pesquisar</label>
+          <input type="text" id="pesquisaGrade" onkeyup="filtrarGrade()" placeholder="Digite o nome da tela...">
+        </div>
+
+        <div class="table-wrap">
+          <table id="tabelaPermissoes">
+            <thead>
+              <tr>
+                <th class="col-sel"><input type="checkbox" class="chk-red" onchange="selecionarTodasLinhas(this.checked)"></th>
+                <th style="width: 95px;">Cod. Usuário</th>
+                <th style="width: 170px;">Usuário</th>
+                <th>Tela</th>
+                <th class="col-center">Consultar</th>
+                <th class="col-center">Alterar</th>
+                <th class="col-center">Excluir</th>
+                <th class="col-center">Incluir</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in permissoes %}
+                <tr class="linha-tela">
+                  <td class="col-sel">
+                    <input type="checkbox" class="chk-red chk-linha">
+                  </td>
+                  <td>{{ usuario_selecionado.pk|stringformat:"04d" }}</td>
+                  <td>{{ usuario_selecionado.username|upper }}</td>
+                  <td class="nome-tela">{{ p.nome_tela }}</td>
+                  <td class="col-center">
+                    <input type="checkbox" name="consultar_{{ p.pk }}" class="chk-red perm-consultar" {% if p.pode_consultar %}checked{% endif %}>
+                  </td>
+                  <td class="col-center">
+                    <input type="checkbox" name="alterar_{{ p.pk }}" class="chk-red perm-alterar" {% if p.pode_alterar %}checked{% endif %}>
+                  </td>
+                  <td class="col-center">
+                    <input type="checkbox" name="excluir_{{ p.pk }}" class="chk-red perm-excluir" {% if p.pode_excluir %}checked{% endif %}>
+                  </td>
+                  <td class="col-center">
+                    <input type="checkbox" name="incluir_{{ p.pk }}" class="chk-red perm-incluir" {% if p.pode_incluir %}checked{% endif %}>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="8" style="text-align:center; padding: 14px; color:#6c757d;">
+                    Nenhuma tela encontrada para este usuário.
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="footer-count">{{ total_registros }} registros</div>
+        <button type="submit" class="btn-confirm">Confirmar</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function toggleSubmenu(btn) {
+      const submenu = btn.nextElementSibling;
+      const arrow = btn.querySelector(".arrow");
+      if (!submenu) return;
+      submenu.classList.toggle("collapsed");
+      if (arrow) {
+        arrow.textContent = submenu.classList.contains("collapsed") ? "▸" : "▾";
+      }
+    }
+
+    function selecionarTodasLinhas(marcado) {
+      document.querySelectorAll(".linha-tela").forEach(tr => {
+        if (tr.style.display === "none") return;
+        const sel = tr.querySelector(".chk-linha");
+        if (sel) sel.checked = marcado;
+      });
+    }
+
+    function aplicarColunaSelecionados(tipo, marcado) {
+      document.querySelectorAll(".linha-tela").forEach(tr => {
+        const sel = tr.querySelector(".chk-linha");
+        if (sel && sel.checked) {
+          const box = tr.querySelector(".perm-" + tipo);
+          if (box) box.checked = marcado;
+        }
+      });
+    }
+
+    function filtrarGrade() {
+      const termo = document.getElementById("pesquisaGrade").value.toLowerCase().trim();
+      let visiveis = 0;
+      document.querySelectorAll(".linha-tela").forEach(tr => {
+        const nome = tr.querySelector(".nome-tela").textContent.toLowerCase();
+        const match = !termo || nome.includes(termo);
+        tr.style.display = match ? "" : "none";
+        if (match) visiveis++;
+      });
+      document.querySelector(".footer-count").textContent = visiveis + " registros";
+    }
+
+    function filtrarMenuLateral() {
+      const termo = document.getElementById("menuFiltro").value.toLowerCase().trim();
+      document.querySelectorAll(".nav-list li").forEach(li => {
+        const txt = li.textContent.toLowerCase();
+        li.style.display = !termo || txt.includes(termo) ? "" : "none";
+      });
+    }
+
+    function abrirCopia() {
+      const origemId = prompt("Informe o ID numérico do usuário de origem para copiar os acessos:");
+      if (origemId && /^\d+$/.test(origemId.trim())) {
+        document.getElementById("origemUsuarioId").value = origemId.trim();
+        document.getElementById("acaoForm").value = "copiar";
+        document.getElementById("formPermissoes").submit();
+      }
+    }
+  </script>
+</body>
+</html>

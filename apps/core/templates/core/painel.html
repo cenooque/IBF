@@ -1,0 +1,191 @@
+{% load static acessos_tags %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ titulo_pagina }}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; }
+    body { display: flex; min-height: 100vh; background: #f4f6f9; color: #222; }
+    .sidebar { width: 250px; background: #1e2229; color: #fff; display: flex; flex-direction: column; flex-shrink: 0; }
+    .brand { padding: 16px; font-weight: bold; border-bottom: 1px solid #2e3440; font-size: 15px; }
+    .sidebar input { margin: 12px; padding: 8px 10px; border-radius: 4px; border: 1px solid #3b4252; background: #2e3440; color: #fff; }
+    .nav-group { padding: 6px 0; }
+    .nav-title { padding: 8px 16px; font-size: 12px; text-transform: uppercase; color: #9aa5b1; }
+    .nav-link { display: block; padding: 9px 24px; color: #e4e7eb; text-decoration: none; font-size: 14px; }
+    .nav-link:hover, .nav-link.active { background: #2d3748; color: #fff; }
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .topbar { background: #fff; padding: 14px 24px; border-bottom: 1px solid #d9e2ec; display: flex; justify-content: space-between; align-items: center; }
+    .content {
+      flex: 1;
+      padding: 20px 24px;
+      background:
+        linear-gradient(rgba(248, 250, 252, 0.86), rgba(248, 250, 252, 0.88)),
+        url("{% static 'img/fachada_ibf.jpg' %}") center / cover no-repeat fixed;
+    }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
+    .card { background: rgba(255, 255, 255, 0.92); border-radius: 6px; padding: 16px; border-left: 4px solid #2b6cb0; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .card.sucesso { border-left-color: #2f855a; }
+    .card.alerta { border-left-color: #c53030; }
+    .card-label { font-size: 13px; color: #616e7c; margin-bottom: 6px; }
+    .card-value { font-size: 22px; font-weight: bold; }
+    .toolbar { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+    .btn { padding: 8px 14px; border-radius: 4px; border: none; cursor: pointer; font-size: 13px; text-decoration: none; display: inline-block; }
+    .btn-primary { background: #c53030; color: #fff; }
+    .btn-secondary { background: #3182ce; color: #fff; }
+    .table-wrap { background: rgba(255, 255, 255, 0.94); border-radius: 6px; overflow-x: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { background: #2d3748; color: #fff; text-align: left; padding: 10px 12px; white-space: nowrap; }
+    td { padding: 10px 12px; border-bottom: 1px solid #edf2f7; }
+  </style>
+</head>
+<body>
+  {% if request.user.is_superuser or request.user|pode_ver:"PAINEL_GERAL" or request.user|pode_ver:"PESSOAS_CADASTRO" or request.user|pode_ver:"CARGOS_CADASTRO" or request.user|pode_ver:"CONTAS_RECEBER" or request.user|pode_ver:"CONTAS_PAGAR" or request.user|pode_ver:"FORNECEDORES" or request.user|pode_ver:"CENTRO_CUSTO" or request.user|pode_ver:"PLANO_CONTAS" or request.user|pode_ver:"USUARIOS_CADASTRO" or request.user|pode_ver:"LIBERACAO_ACESSOS" %}
+    <aside class="sidebar">
+      <div class="brand">IBF — Gestão da Igreja</div>
+      <input type="search" placeholder="Pesquisar menu...">
+
+      {% if request.user|pode_ver:"PAINEL_GERAL" or request.user|pode_ver:"PESSOAS_CADASTRO" %}
+        <div class="nav-group">
+          <div class="nav-title">Principal</div>
+          {% if request.user|pode_ver:"PAINEL_GERAL" %}
+            <a class="nav-link active" href="/">Painel Geral</a>
+          {% endif %}
+          {% if request.user|pode_ver:"PESSOAS_CADASTRO" %}
+            <a class="nav-link" href="/pessoas/">Pessoas</a>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {% if request.user.is_superuser or request.user|pode_ver:"CONTAS_RECEBER" or request.user|pode_ver:"CONTAS_PAGAR" or request.user|pode_ver:"FORNECEDORES" or request.user|pode_ver:"CENTRO_CUSTO" or request.user|pode_ver:"PLANO_CONTAS" %}
+        <div class="nav-group">
+          <div class="nav-title">Financeiro</div>
+          {% if request.user.is_superuser or request.user|pode_ver:"CONTAS_RECEBER" %}
+            <a class="nav-link" href="/admin/finance/contareceber/">Contas a Receber</a>
+          {% endif %}
+          {% if request.user.is_superuser or request.user|pode_ver:"CONTAS_PAGAR" %}
+            <a class="nav-link" href="/admin/finance/contapagar/">Contas a Pagar</a>
+          {% endif %}
+          {% if request.user.is_superuser or request.user|pode_ver:"FORNECEDORES" %}
+            <a class="nav-link" href="/admin/finance/fornecedor/">Fornecedores</a>
+          {% endif %}
+          {% if request.user.is_superuser or request.user|pode_ver:"CENTRO_CUSTO" %}
+            <a class="nav-link" href="{% url 'finance:centro_custo' %}">Centro de Custo</a>
+          {% endif %}
+          {% if request.user.is_superuser or request.user|pode_ver:"PLANO_CONTAS" %}
+            <a class="nav-link" href="{% url 'finance:plano_contas' %}">Plano de Contas</a>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {% if request.user.is_superuser or request.user|pode_ver:"USUARIOS_CADASTRO" or request.user|pode_ver:"LIBERACAO_ACESSOS" %}
+        <div class="nav-group">
+          <div class="nav-title">Sistema</div>
+          {% if request.user|pode_ver:"USUARIOS_CADASTRO" %}
+            <a class="nav-link" href="{% url 'core:usuario_lista' %}">Usuários</a>
+          {% endif %}
+          {% if request.user|pode_ver:"LIBERACAO_ACESSOS" %}
+            <a class="nav-link" href="{% url 'core:liberacao_acessos' %}">Liberação de Acessos</a>
+          {% endif %}
+          {% if request.user.is_superuser %}
+            <a class="nav-link" href="/admin/">Django Admin</a>
+          {% endif %}
+        </div>
+      {% endif %}
+    </aside>
+  {% endif %}
+
+  <div class="main">
+    <header class="topbar">
+      <h1>{{ titulo_pagina }}</h1>
+      <span>Usuário: {{ request.user.username }}</span>
+    </header>
+    <main class="content">
+      <div class="cards">
+        {% for c in cards %}
+        <div class="card {{ c.destaque }}">
+          <div class="card-label">{{ c.titulo }}</div>
+          <div class="card-value">{{ c.valor }}</div>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% if request.user|pode_incluir:"PESSOAS_CADASTRO" or request.user|pode_incluir:"CONTAS_RECEBER" or request.user|pode_incluir:"CONTAS_PAGAR" or request.user|pode_incluir:"CENTRO_CUSTO" or request.user|pode_incluir:"PLANO_CONTAS" %}
+        <div class="toolbar">
+          {% if request.user|pode_incluir:"PESSOAS_CADASTRO" %}
+            <a class="btn btn-primary" href="/pessoas/nova/">+ Incluir Pessoa</a>
+          {% endif %}
+          {% if request.user|pode_incluir:"CONTAS_RECEBER" %}
+            <a class="btn btn-secondary" href="/admin/finance/contareceber/add/">+ Conta a Receber</a>
+          {% endif %}
+          {% if request.user|pode_incluir:"CONTAS_PAGAR" %}
+            <a class="btn btn-secondary" href="/admin/finance/contapagar/add/">+ Conta a Pagar</a>
+          {% endif %}
+          {% if request.user|pode_incluir:"CENTRO_CUSTO" %}
+            <a class="btn btn-secondary" href="{% url 'finance:centro_custo' %}">+ Centro de Custo</a>
+          {% endif %}
+          {% if request.user|pode_incluir:"PLANO_CONTAS" %}
+            <a class="btn btn-secondary" href="{% url 'finance:plano_contas' %}">+ Plano de Contas</a>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Módulo</th>
+              <th>Tabela SQLite</th>
+              <th>Acesso Rápido</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if request.user|pode_ver:"PESSOAS_CADASTRO" %}
+              <tr>
+                <td>Pessoas e Famílias</td>
+                <td>pessoas</td>
+                <td><a href="/pessoas/">Abrir cadastro</a></td>
+              </tr>
+            {% endif %}
+            {% if request.user|pode_ver:"CONTAS_RECEBER" %}
+              <tr>
+                <td>Contas a Receber</td>
+                <td>fin_contas_receber</td>
+                <td><a href="/admin/finance/contareceber/">Abrir lançamentos</a></td>
+              </tr>
+            {% endif %}
+            {% if request.user|pode_ver:"CONTAS_PAGAR" %}
+              <tr>
+                <td>Contas a Pagar</td>
+                <td>fin_contas_pagar</td>
+                <td><a href="/admin/finance/contapagar/">Abrir lançamentos</a></td>
+              </tr>
+            {% endif %}
+            {% if request.user|pode_ver:"FORNECEDORES" %}
+              <tr>
+                <td>Fornecedores</td>
+                <td>fin_fornecedores</td>
+                <td><a href="/admin/finance/fornecedor/">Abrir fornecedores</a></td>
+              </tr>
+            {% endif %}
+            {% if request.user.is_superuser or request.user|pode_ver:"CENTRO_CUSTO" %}
+              <tr>
+                <td>Centro de Custo</td>
+                <td>fin_centros_custo</td>
+                <td><a href="{% url 'finance:centro_custo' %}">Abrir centros de custo</a></td>
+              </tr>
+            {% endif %}
+            {% if request.user.is_superuser or request.user|pode_ver:"PLANO_CONTAS" %}
+              <tr>
+                <td>Plano de Contas</td>
+                <td>fin_plano_contas</td>
+                <td><a href="{% url 'finance:plano_contas' %}">Abrir plano de contas</a></td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

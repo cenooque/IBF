@@ -1,0 +1,167 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+
+{% block title %}Igreja Batista da Fama | {{ title }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">Igreja Batista da Fama</a>
+</h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    #nav-sidebar {
+        min-width: 250px;
+        width: 250px;
+        padding: 16px 12px;
+        box-sizing: border-box;
+    }
+
+    #nav-sidebar .menu-title {
+        font-size: 12px;
+        font-weight: bold;
+        color: var(--body-quiet-color);
+        text-transform: uppercase;
+        padding: 14px 10px 6px;
+    }
+
+    #nav-sidebar .menu-link,
+    #nav-sidebar summary {
+        display: block;
+        padding: 10px 12px;
+        border-radius: 6px;
+        color: var(--body-fg);
+        text-decoration: none;
+        cursor: pointer;
+        list-style: none;
+    }
+
+    #nav-sidebar summary::-webkit-details-marker {
+        display: none;
+    }
+
+    #nav-sidebar summary::after {
+        content: "›";
+        float: right;
+        font-size: 18px;
+    }
+
+    #nav-sidebar details[open] > summary::after {
+        content: "⌄";
+    }
+
+    #nav-sidebar .menu-link:hover,
+    #nav-sidebar summary:hover {
+        background: var(--darkened-bg);
+    }
+
+    #nav-sidebar .submenu {
+        padding-left: 18px;
+        margin: 3px 0 8px;
+    }
+
+    #nav-sidebar .submenu a {
+        display: block;
+        padding: 8px 12px;
+        color: var(--body-quiet-color);
+        text-decoration: none;
+        border-radius: 5px;
+    }
+
+    #nav-sidebar .submenu a:hover {
+        color: var(--body-fg);
+        background: var(--darkened-bg);
+    }
+
+    #nav-sidebar a:focus,
+    #nav-sidebar summary:focus {
+        outline: 2px solid var(--link-fg);
+        outline-offset: 2px;
+    }
+
+    @media (max-width: 767px) {
+        #nav-sidebar {
+            width: 100%;
+            min-width: 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block nav-sidebar %}
+<nav id="nav-sidebar" aria-label="Menu principal">
+
+    <div class="menu-title">Principal</div>
+
+    <a class="menu-link" href="{% url 'admin:index' %}">
+        Painel inicial
+    </a>
+
+    {% if user.is_superuser or perms.people.view_pessoa %}
+    <details {% if "/admin/people/" in request.path %}open{% endif %}>
+        <summary>Cadastros</summary>
+        <div class="submenu">
+            {% if user.is_superuser or perms.people.view_pessoa %}
+            <a href="{% url 'admin:people_pessoa_changelist' %}">
+                Pessoas e membros
+            </a>
+            {% endif %}
+        </div>
+    </details>
+    {% endif %}
+
+    {% if user.is_superuser or perms.finance.view_contafinanceira or perms.finance.view_centrocusto or perms.finance.view_planocontas or perms.finance.view_grupocentrocusto or perms.finance.view_fornecedor or perms.finance.view_contareceber or perms.finance.view_contapagar %}
+    <details {% if "/admin/finance/" in request.path %}open{% endif %}>
+        <summary>Financeiro</summary>
+        <div class="submenu">
+            {% if user.is_superuser or perms.finance.view_contafinanceira %}
+            <a href="{% url 'admin:finance_contafinanceira_changelist' %}">
+                Contas financeiras
+            </a>
+            {% endif %}
+
+            {% if user.is_superuser or perms.finance.view_grupocentrocusto %}
+            <a href="{% url 'admin:finance_grupocentrocusto_changelist' %}">
+                Grupos de centro de custo
+            </a>
+            {% endif %}
+
+            {% if user.is_superuser or perms.finance.view_centrocusto %}
+            <a href="{% url 'finance:centro_custo' %}">
+                Centros de custo
+            </a>
+            {% endif %}
+
+            {% if user.is_superuser or perms.finance.view_planocontas %}
+            <a href="{% url 'finance:plano_contas' %}">
+                Plano de contas
+            </a>
+            {% endif %}
+
+            {% if user.is_superuser or perms.finance.view_fornecedor %}
+            <a href="{% url 'admin:finance_fornecedor_changelist' %}">
+                Fornecedores
+            </a>
+            {% endif %}
+
+            {% if user.is_superuser or perms.finance.view_contareceber %}
+            <a href="{% url 'admin:finance_contareceber_changelist' %}">
+                Contas a receber
+            </a>
+            {% endif %}
+
+            {% if user.is_superuser or perms.finance.view_contapagar %}
+            <a href="{% url 'admin:finance_contapagar_changelist' %}">
+                Contas a pagar
+            </a>
+            {% endif %}
+        </div>
+    </details>
+    {% endif %}
+
+</nav>
+{% endblock %}

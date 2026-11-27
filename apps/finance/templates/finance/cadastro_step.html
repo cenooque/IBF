@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ titulo_pagina }}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", Arial, Helvetica, sans-serif; }
+    body { background: #ffffff; color: #2b2f36; min-height: 100vh; font-size: 13px; }
+
+    .page-container {
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 24px 36px 32px;
+    }
+
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-left h1 {
+      font-size: 26px;
+      font-weight: 400;
+      color: #2f353d;
+    }
+    .btn-help {
+      width: 22px;
+      height: 22px;
+      background: #23272c;
+      color: #fff;
+      border: 0;
+      border-radius: 3px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .header-links {
+      display: flex;
+      gap: 14px;
+      font-size: 12.5px;
+    }
+    .header-links a {
+      color: #495057;
+      text-decoration: none;
+    }
+    .header-links a:hover {
+      color: #c62828;
+      text-decoration: underline;
+    }
+
+    .instruction-text {
+      color: #525860;
+      font-size: 12.5px;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e5e9ef;
+    }
+
+    .messages, .form-errors {
+      margin-bottom: 16px;
+    }
+    .msg-item {
+      padding: 9px 12px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      font-size: 12.5px;
+    }
+    .msg-success { background: #e6f4ea; color: #137333; border: 1px solid #ceead6; }
+    .msg-error { background: #fce8e6; color: #c5221f; border: 1px solid #fad2cf; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 220px;
+      gap: 18px 28px;
+      align-items: start;
+    }
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .field-group label.field-label {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #2f353d;
+    }
+    .form-control,
+    .form-select,
+    .form-textarea,
+    input[type="text"],
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid #8a929c;
+      border-radius: 3px;
+      padding: 8px 10px;
+      font-size: 13px;
+      color: #2b2f36;
+      background: #fff;
+    }
+    .codigo-wrap input {
+      max-width: 280px;
+    }
+
+    .grupo-box {
+      display: flex;
+      align-items: stretch;
+    }
+    .grupo-box select,
+    .grupo-box input {
+      flex: 1;
+      border: 1px solid #8a929c;
+      border-right: 0;
+      border-radius: 3px 0 0 3px;
+      padding: 8px 10px;
+      font-size: 13px;
+      background: #fff;
+    }
+    .btn-icon-red {
+      width: 36px;
+      background: #c62828;
+      color: #fff;
+      border: 1px solid #b71c1c;
+      cursor: pointer;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-icon-red:hover {
+      background: #a81c1c;
+    }
+    .btn-icon-red:last-child {
+      border-radius: 0 3px 3px 0;
+      border-left: 1px solid #a81c1c;
+    }
+
+    .side-options {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding-top: 2px;
+    }
+    .opt-block-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #2f353d;
+      margin-bottom: 8px;
+    }
+    .side-options ul {
+      list-style: none;
+    }
+    .side-options li,
+    .opt-choice {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      color: #2f353d;
+      cursor: pointer;
+    }
+    .side-options input[type="radio"],
+    .side-options input[type="checkbox"],
+    .opt-choice input[type="checkbox"] {
+      width: 15px;
+      height: 15px;
+      accent-color: #2b6cb0;
+      cursor: pointer;
+    }
+
+    .obs-row {
+      grid-column: 1 / -1;
+      margin-top: 6px;
+    }
+    .obs-row textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    .footer-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 28px;
+    }
+    .btn-voltar {
+      background: #5c636a;
+      color: #fff;
+      border: 0;
+      border-radius: 3px;
+      padding: 9px 26px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-voltar:hover {
+      background: #495057;
+    }
+    .btn-gravar {
+      background: #c62828;
+      color: #fff;
+      border: 0;
+      border-radius: 3px;
+      padding: 9px 26px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-gravar:hover {
+      background: #a81c1c;
+    }
+
+    @media (max-width: 900px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      .codigo-wrap input {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-container">
+    <div class="header-row">
+      <div class="header-left">
+        <h1>{{ titulo_tela }}</h1>
+        <button type="button" class="btn-help" onclick="alert('{{ subtitulo_ajuda|escapejs }}')">?</button>
+      </div>
+      <div class="header-links">
+        {% if instancia and url_novo %}
+          <a href="{% url url_novo %}">Novo</a>
+        {% endif %}
+        <a href="{{ url_voltar }}">Painel Geral</a>
+      </div>
+    </div>
+
+    <p class="instruction-text">{{ subtitulo_ajuda }}</p>
+
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div class="msg-item {% if message.tags == 'error' %}msg-error{% else %}msg-success{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if form.errors %}
+      <div class="form-errors">
+        {% for field in form %}
+          {% for error in field.errors %}
+            <div class="msg-item msg-error"><strong>{{ field.label }}:</strong> {{ error }}</div>
+          {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+          <div class="msg-item msg-error">{{ error }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="post" id="formCadastroPrincipal">
+      {% csrf_token %}
+
+      <div class="form-grid" id="painelGeral">
+        {% if form.codigo %}
+          <div class="field-group codigo-wrap">
+            <label class="field-label" for="{{ form.codigo.id_for_label }}">{{ form.codigo.label }}:</label>
+            {{ form.codigo }}
+          </div>
+        {% endif %}
+
+        {% if form.tipo %}
+          <div class="field-group">
+            <label class="field-label" for="{{ form.tipo.id_for_label }}">{{ form.tipo.label }}:</label>
+            {{ form.tipo }}
+          </div>
+        {% endif %}
+
+        <div class="side-options">
+          {% if form.classificacao_custo %}
+            <div>
+              <div class="opt-block-title">Custo</div>
+              {{ form.classificacao_custo }}
+            </div>
+          {% endif %}
+        </div>
+
+        {% if form.descricao %}
+          <div class="field-group">
+            <label class="field-label" for="{{ form.descricao.id_for_label }}">{{ form.descricao.label }}:</label>
+            {{ form.descricao }}
+          </div>
+        {% endif %}
+
+        {% if form.nome %}
+          <div class="field-group">
+            <label class="field-label" for="{{ form.nome.id_for_label }}">{{ form.nome.label }}:</label>
+            {{ form.nome }}
+          </div>
+        {% endif %}
+
+        {% if form.natureza %}
+          <div class="field-group">
+            <label class="field-label" for="{{ form.natureza.id_for_label }}">{{ form.natureza.label }}:</label>
+            {{ form.natureza }}
+          </div>
+        {% endif %}
+
+        {% if form.grupo %}
+          <div class="field-group">
+            <label class="field-label" for="{{ form.grupo.id_for_label }}">{{ form.grupo.label }}:</label>
+            <div class="grupo-box">
+              {{ form.grupo }}
+              <button type="button" class="btn-icon-red" title="Buscar grupo" onclick="focarGrupo()">🔍</button>
+              <button type="button" class="btn-icon-red" title="Limpar grupo" onclick="limparGrupo()">🗑</button>
+            </div>
+          </div>
+        {% endif %}
+
+        {% if form.conta_pai %}
+          <div class="field-group">
+            <label class="field-label" for="{{ form.conta_pai.id_for_label }}">{{ form.conta_pai.label }}:</label>
+            <div class="grupo-box">
+              {{ form.conta_pai }}
+              <button type="button" class="btn-icon-red" title="Buscar conta pai" onclick="focarGrupo()">🔍</button>
+              <button type="button" class="btn-icon-red" title="Limpar conta pai" onclick="limparGrupo()">🗑</button>
+            </div>
+          </div>
+        {% endif %}
+
+        <div class="side-options">
+          <div>
+            {% if form.ativo %}
+              <label class="opt-choice">{{ form.ativo }} <span>{{ form.ativo.label }}</span></label>
+            {% endif %}
+            {% if form.produtivo %}
+              <label class="opt-choice">{{ form.produtivo }} <span>{{ form.produtivo.label }}</span></label>
+            {% endif %}
+            {% if form.aceita_contas_pagar %}
+              <label class="opt-choice">{{ form.aceita_contas_pagar }} <span>{{ form.aceita_contas_pagar.label }}</span></label>
+            {% endif %}
+            {% if form.aceita_contas_receber %}
+              <label class="opt-choice">{{ form.aceita_contas_receber }} <span>{{ form.aceita_contas_receber.label }}</span></label>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if form.observacao %}
+          <div class="field-group obs-row">
+            <label class="field-label" for="{{ form.observacao.id_for_label }}">{{ form.observacao.label }}:</label>
+            {{ form.observacao }}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="footer-actions">
+        <a href="{{ url_voltar }}" class="btn-voltar">Voltar</a>
+        <button type="submit" name="gravar" value="1" class="btn-gravar">Gravar</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    function focarGrupo() {
+      const el = document.querySelector(".grupo-box select, .grupo-box input");
+      if (el) el.focus();
+    }
+
+    function limparGrupo() {
+      const sel = document.querySelector(".grupo-box select");
+      const inp = document.querySelector(".grupo-box input");
+      if (sel) sel.value = "";
+      if (inp) inp.value = "";
+    }
+  </script>
+</body>
+</html>

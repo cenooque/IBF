@@ -1,0 +1,100 @@
+{% load acessos_tags %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ titulo_pagina }}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; }
+    body { background: #f4f6f9; color: #222; padding: 20px; }
+    .page-box { max-width: 1180px; margin: 0 auto; background: #fff; border: 1px solid #d9e2ec; border-radius: 4px; padding: 18px 22px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .page-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0; margin-bottom: 14px; gap: 12px; flex-wrap: wrap; }
+    .page-title { font-size: 20px; font-weight: 600; color: #1a202c; }
+    .top-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn { padding: 7px 14px; border-radius: 3px; border: 1px solid transparent; cursor: pointer; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+    .btn-green { background: #2f855a; color: #fff; border-color: #276749; }
+    .btn-green:hover { background: #276749; }
+    .btn-light { background: #edf2f7; color: #2d3748; border-color: #cbd5e0; }
+    .btn-light:hover { background: #e2e8f0; }
+    .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+    .filter-bar { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+    .filter-bar input[type="text"] { padding: 6px 10px; border: 1px solid #a0aec0; border-radius: 3px; font-size: 13px; min-width: 260px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { border: 1px solid #e2e8f0; padding: 8px 10px; text-align: left; }
+    th { background: #f7fafc; color: #2d3748; font-weight: 600; }
+    tr:hover td { background: #f8fafc; }
+    .badge-ok { color: #276749; font-weight: 600; }
+    .badge-off { color: #c53030; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="page-box">
+    <div class="page-header">
+      <h1 class="page-title">{{ titulo_pagina }}</h1>
+      <div class="top-actions">
+        {% if request.user|pode_incluir:"CARGOS_CADASTRO" %}
+          <a href="{% url 'people:cargo_criar' %}" class="btn btn-green">+ Novo Cargo</a>
+        {% endif %}
+        {% if request.user|pode_ver:"PESSOAS_CADASTRO" %}
+          <a href="/pessoas/" class="btn btn-light">Ir para Pessoas</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <form method="get" class="filter-bar">
+      <input type="text" name="q" value="{{ busca }}" placeholder="Buscar por nome do cargo...">
+      <button type="submit" class="btn btn-light">Filtrar</button>
+      {% if busca %}
+        <a href="{% url 'people:cargo_lista' %}" class="btn btn-light">Limpar</a>
+      {% endif %}
+    </form>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 70px;">ID</th>
+          <th>Cargo</th>
+          <th style="width: 130px;">Ano vigente de</th>
+          <th style="width: 90px;">Até</th>
+          <th>Observação</th>
+          <th style="width: 90px;">Status</th>
+          {% if request.user|pode_alterar:"CARGOS_CADASTRO" %}
+            <th style="width: 90px;">Ações</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in cargos %}
+          <tr>
+            <td>{{ c.pk }}</td>
+            <td>{{ c.nome }}</td>
+            <td>{{ c.ano_vigente_de|default:"—" }}</td>
+            <td>{{ c.ano_vigente_ate|default:"—" }}</td>
+            <td>{{ c.observacao|default:"—" }}</td>
+            <td>
+              {% if c.ativo %}
+                <span class="badge-ok">Ativo</span>
+              {% else %}
+                <span class="badge-off">Inativo</span>
+              {% endif %}
+            </td>
+            {% if request.user|pode_alterar:"CARGOS_CADASTRO" %}
+              <td>
+                <a href="{% url 'people:cargo_editar' c.pk %}" class="btn btn-light btn-sm">Editar</a>
+              </td>
+            {% endif %}
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="{% if request.user|pode_alterar:'CARGOS_CADASTRO' %}7{% else %}6{% endif %}" style="text-align: center; color: #718096; padding: 16px;">
+              Nenhum cargo cadastrado até o momento.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

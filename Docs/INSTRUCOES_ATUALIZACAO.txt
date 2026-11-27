@@ -1,0 +1,92 @@
+GESTÃO DA IGREJA - ATUALIZAÇÃO DE MODELOS, RELATÓRIOS E PERMISSÕES
+
+IMPORTANTE
+- Este pacote é uma atualização para o projeto existente em C:\IBF.
+- Não substitua o banco SQLite e não apague a pasta data.
+- Faça cópia de segurança de C:\IBF antes de alterar arquivos.
+- Não copie o conteúdo do ZIP por cima de toda a pasta C:\IBF. Copie/mescle somente os caminhos indicados.
+
+1) PARAR O SERVIDOR
+Na janela do CMD do Django, pressione CTRL+C.
+
+2) BACKUP
+Faça uma cópia do arquivo:
+C:\IBF\data\gestao_igreja.sqlite3
+e da pasta C:\IBF inteira, com o servidor parado.
+
+3) COPIAR ARQUIVOS
+Extraia o ZIP em uma pasta temporária.
+Copie para C:\IBF, mesclando pastas:
+- apps\people\models.py
+- apps\people\admin.py
+- apps\finance\models.py
+- apps\finance\admin.py
+- apps\reports\ (todos os arquivos)
+- apps\core\management\commands\configurar_perfis.py
+- templates\admin\base_site.html
+- templates\reports\ (todos os arquivos)
+
+4) SETTINGS.PY
+Confirme que INSTALLED_APPS contém:
+    "apps.people",
+    "apps.finance",
+    "apps.reports",
+
+Se reports ainda não estiver listado, adicione "apps.reports.apps.ReportsConfig".
+Não duplique entradas existentes.
+
+Confirme que TEMPLATES[0]["DIRS"] contém a pasta templates do projeto:
+    BASE_DIR / "templates"
+
+5) CONFIG/URLS.PY
+Adicione o include abaixo sem remover o caminho do admin:
+    from django.urls import include, path
+    path("relatorios/", include("apps.reports.urls")),
+
+Exemplo:
+    urlpatterns = [
+        path("admin/", admin.site.urls),
+        path("relatorios/", include("apps.reports.urls")),
+    ]
+
+6) VALIDAR E MIGRAR
+Abra CMD:
+    cd /d C:\IBF
+    .venv\Scripts\activate
+    python manage.py check
+    python manage.py makemigrations people finance
+    python manage.py migrate
+
+A migração adiciona permissões personalizadas. Ela não apaga os dados atuais.
+
+7) CRIAR GRUPOS INICIAIS
+    python manage.py configurar_perfis
+
+O comando cria Secretaria, Tesouraria e Consulta. Ele NÃO concede relatórios financeiros a grupos.
+
+8) PERMISSÕES FINANCEIRAS INDIVIDUAIS
+No admin:
+    Usuários > selecione usuário > Permissões do usuário
+
+Conceda individualmente conforme a necessidade:
+- Pode acessar a área de relatórios financeiros
+- Pode visualizar relatório de fluxo de caixa
+- Pode visualizar prestação de contas
+- Pode visualizar relatório de receitas e despesas
+
+As permissões customizadas aparecem depois de executar migrate.
+
+9) RELATÓRIOS DISPONÍVEIS NESTA ETAPA
+- /relatorios/aniversariantes/ (permissão people.view_relatorio_aniversariantes)
+- /relatorios/pessoas/ (permissão people.view_relatorio_pessoas)
+- /relatorios/financeiro/ (permissão finance.view_relatorio_financeiro; página protegida de preparação)
+
+10) LIMITAÇÕES DESTA ETAPA
+- O menu do cabeçalho do Django Admin é filtrado por permissões.
+- O próprio Django Admin oculta os modelos para os quais o usuário não tem permissões.
+- As URLs dos relatórios verificam permissões no servidor e retornam 403 sem autorização.
+- Os relatórios financeiros completos ainda não calculam valores porque os modelos de lançamentos, parcelas, pagamentos, recebimentos, transferências e estornos serão implementados na etapa seguinte.
+- O superusuário mantém acesso total.
+- O menu e as telas aqui implementados pertencem ao Django Admin inicial; a interface própria do sistema será desenvolvida em etapa posterior.
+
+Se algum comando apresentar erro, pare e envie a mensagem completa antes de prosseguir.

@@ -1,0 +1,336 @@
+{% load acessos_tags %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ titulo_pagina }}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; }
+    body { display: flex; min-height: 100vh; background: #f4f6f9; color: #222; }
+    .sidebar { width: 250px; background: #1e2229; color: #fff; display: flex; flex-direction: column; flex-shrink: 0; }
+    .brand { padding: 16px; font-weight: bold; border-bottom: 1px solid #2e3440; font-size: 15px; }
+    .nav-title { padding: 10px 16px 6px; font-size: 11px; text-transform: uppercase; color: #9aa5b1; }
+    .nav-link { display: block; padding: 9px 24px; color: #e4e7eb; text-decoration: none; font-size: 14px; }
+    .nav-link:hover, .nav-link.active { background: #2d3748; color: #fff; }
+    .nav-toggle {
+      width: 100%; background: transparent; border: 0; color: #e4e7eb; font: inherit;
+      font-size: 14px; padding: 9px 24px; display: flex; justify-content: space-between;
+      align-items: center; cursor: pointer; text-align: left;
+    }
+    .nav-toggle:hover, .nav-toggle.active { background: #2d3748; color: #fff; }
+    .submenu { list-style: none; background: #171a1f; }
+    .submenu.collapsed { display: none; }
+    .sublink { display: block; padding: 8px 16px 8px 36px; color: #cbd5e0; text-decoration: none; font-size: 13px; }
+    .sublink:hover { background: #2d3748; color: #fff; }
+    .sidebar-footer { margin-top: auto; padding: 14px 16px; border-top: 1px solid #2e3440; }
+    .btn-logout {
+      width: 100%; padding: 8px 12px; border-radius: 4px; border: 1px solid #4a5568;
+      background: #2d3748; color: #fff; cursor: pointer; font-size: 13px; font-weight: bold;
+    }
+    .btn-logout:hover { background: #c53030; border-color: #c53030; }
+
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .topbar { background: #fff; padding: 14px 24px; border-bottom: 1px solid #d9e2ec; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .topbar-user { display: flex; align-items: center; gap: 12px; font-size: 13px; }
+    .btn-sair-top { padding: 6px 12px; border-radius: 4px; border: 1px solid #cbd5e0; background: #edf2f7; color: #222; cursor: pointer; font-size: 12px; font-weight: bold; }
+    .btn-sair-top:hover { background: #e2e8f0; }
+
+    .content { padding: 20px 24px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 18px; }
+    .card { background: #fff; border-radius: 6px; padding: 14px 16px; border-left: 4px solid #2b6cb0; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .card.sucesso { border-left-color: #2f855a; }
+    .card.alerta { border-left-color: #c53030; }
+    .card-label { font-size: 12px; color: #616e7c; margin-bottom: 4px; }
+    .card-value { font-size: 20px; font-weight: bold; }
+    .filter-box { background: #fff; padding: 14px; border-radius: 6px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .filter-box input, .filter-box select { padding: 7px 10px; border: 1px solid #cbd5e0; border-radius: 4px; font-size: 13px; background: #fff; }
+    .toolbar { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+    .btn { padding: 8px 13px; border-radius: 4px; border: none; cursor: pointer; font-size: 13px; text-decoration: none; display: inline-block; color: #fff; font-weight: 600; }
+    .btn-primary { background: #c53030; }
+    .btn-primary:hover { background: #9b2c2c; }
+    .btn-red { background: #c53030; color: #fff; }
+    .btn-red:hover:not(:disabled) { background: #9b2c2c; }
+    .btn-red:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-blue { background: #2b6cb0; }
+    .btn-blue:hover { background: #2c5282; }
+    .btn-green { background: #2f855a; }
+    .btn-green:hover { background: #276749; }
+    .btn-dark { background: #4a5568; }
+    .btn-dark:hover { background: #2d3748; }
+    .btn-sm { padding: 4px 9px; font-size: 12px; }
+    .table-wrap { background: #fff; border-radius: 6px; overflow-x: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { background: #2d3748; color: #fff; text-align: left; padding: 10px 12px; white-space: nowrap; }
+    td { padding: 9px 12px; border-bottom: 1px solid #edf2f7; white-space: nowrap; }
+    tr:nth-child(even) td { background: #f9fbfd; }
+    .col-sel { width: 56px; text-align: center; }
+    .chk-input { width: 15px; height: 15px; cursor: pointer; vertical-align: middle; }
+  </style>
+</head>
+<body>
+  {% if request.user.is_superuser or request.user|pode_ver:"PAINEL_GERAL" or request.user|pode_ver:"PESSOAS_CADASTRO" or request.user|pode_ver:"CARGOS_CADASTRO" or request.user|pode_ver:"CONTAS_RECEBER" or request.user|pode_ver:"CONTAS_PAGAR" or request.user|pode_ver:"FORNECEDORES" or request.user|pode_ver:"CENTRO_CUSTO" or request.user|pode_ver:"PLANO_CONTAS" or request.user|pode_ver:"USUARIOS_CADASTRO" or request.user|pode_ver:"LIBERACAO_ACESSOS" %}
+    <aside class="sidebar">
+      <div class="brand">IBF — Gestão da Igreja</div>
+
+      {% if request.user|pode_ver:"PAINEL_GERAL" or request.user|pode_ver:"PESSOAS_CADASTRO" or request.user|pode_ver:"CARGOS_CADASTRO" %}
+        <div class="nav-title">Principal</div>
+        {% if request.user|pode_ver:"PAINEL_GERAL" %}
+          <a class="nav-link" href="/">Painel Geral</a>
+        {% endif %}
+
+        {% if request.user|pode_ver:"PESSOAS_CADASTRO" or request.user|pode_ver:"CARGOS_CADASTRO" %}
+          <button type="button" class="nav-toggle active" onclick="toggleSubmenu(this)">
+            <span>Pessoas</span>
+            <span class="arrow">▾</span>
+          </button>
+          <ul class="submenu">
+            {% if request.user|pode_ver:"PESSOAS_CADASTRO" %}
+              <li><a class="sublink" href="/pessoas/">Cadastro de Pessoas</a></li>
+            {% endif %}
+            {% if request.user|pode_ver:"CARGOS_CADASTRO" %}
+              <li><a class="sublink" href="{% url 'people:cargo_lista' %}">Cargos</a></li>
+            {% endif %}
+          </ul>
+        {% endif %}
+      {% endif %}
+
+      {% if request.user|pode_ver:"CONTAS_RECEBER" or request.user|pode_ver:"CONTAS_PAGAR" or request.user|pode_ver:"FORNECEDORES" or request.user|pode_ver:"CENTRO_CUSTO" or request.user|pode_ver:"PLANO_CONTAS" %}
+        <div class="nav-title">Financeiro</div>
+        {% if request.user|pode_ver:"CONTAS_RECEBER" %}
+          <a class="nav-link" href="/admin/finance/contareceber/">Contas a Receber</a>
+        {% endif %}
+        {% if request.user|pode_ver:"CONTAS_PAGAR" %}
+          <a class="nav-link" href="/admin/finance/contapagar/">Contas a Pagar</a>
+        {% endif %}
+        {% if request.user|pode_ver:"FORNECEDORES" %}
+          <a class="nav-link" href="/admin/finance/fornecedor/">Fornecedores</a>
+        {% endif %}
+        {% if request.user|pode_ver:"CENTRO_CUSTO" %}
+          <a class="nav-link" href="{% url 'finance:centro_custo' %}">Centro de Custo</a>
+        {% endif %}
+        {% if request.user|pode_ver:"PLANO_CONTAS" %}
+          <a class="nav-link" href="{% url 'finance:plano_contas' %}">Plano de Contas</a>
+        {% endif %}
+      {% endif %}
+
+      {% if request.user.is_superuser or request.user|pode_ver:"USUARIOS_CADASTRO" or request.user|pode_ver:"LIBERACAO_ACESSOS" %}
+        <div class="nav-title">Sistema</div>
+        {% if request.user|pode_ver:"USUARIOS_CADASTRO" %}
+          <a class="nav-link" href="{% url 'core:usuario_lista' %}">Usuários</a>
+        {% endif %}
+        {% if request.user|pode_ver:"LIBERACAO_ACESSOS" %}
+          <a class="nav-link" href="{% url 'core:liberacao_acessos' %}">Liberação de Acessos</a>
+        {% endif %}
+        {% if request.user.is_superuser %}
+          <a class="nav-link" href="/admin/">Django Admin</a>
+        {% endif %}
+      {% endif %}
+
+      {% if request.user.is_authenticated %}
+      <div class="sidebar-footer">
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="btn-logout">Sair</button>
+        </form>
+      </div>
+      {% endif %}
+    </aside>
+  {% endif %}
+
+  <div class="main">
+    <header class="topbar">
+      <h1>{{ titulo_pagina }}</h1>
+      <div class="topbar-user">
+        <span>Usuário: {{ request.user.username }}</span>
+        {% if request.user.is_authenticated %}
+          <form method="post" action="{% url 'logout' %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn-sair-top">Sair</button>
+          </form>
+        {% endif %}
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="cards">
+        {% for c in cards %}
+        <div class="card {{ c.destaque }}">
+          <div class="card-label">{{ c.titulo }}</div>
+          <div class="card-value">{{ c.valor }}</div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <form method="get" class="filter-box">
+        <input type="text" name="q" value="{{ q }}" placeholder="Buscar por ID ou nome...">
+
+        <select name="cargo">
+          <option value="">Cargo (Todos)</option>
+          {% for c in cargos %}
+            <option value="{{ c.id }}" {% if cargo_id == c.id|stringformat:"s" %}selected{% endif %}>{{ c.nome }}</option>
+          {% endfor %}
+        </select>
+
+        <select name="crianca">
+          <option value="">Tipo (Todos)</option>
+          <option value="1" {% if crianca == "1" %}selected{% endif %}>Somente Crianças</option>
+          <option value="0" {% if crianca == "0" %}selected{% endif %}>Adultos / Não Criança</option>
+        </select>
+
+        <select name="dizimista">
+          <option value="">Dizimista (Todos)</option>
+          <option value="1" {% if dizimista == "1" %}selected{% endif %}>Dizimista: Sim</option>
+          <option value="0" {% if dizimista == "0" %}selected{% endif %}>Dizimista: Não</option>
+        </select>
+
+        <select name="ativo">
+          <option value="">Situação (Todas)</option>
+          <option value="1" {% if ativo == "1" %}selected{% endif %}>Ativo</option>
+          <option value="0" {% if ativo == "0" %}selected{% endif %}>Inativo</option>
+        </select>
+
+        <button type="submit" class="btn btn-blue">Filtrar</button>
+        <a href="/pessoas/" class="btn btn-dark">Limpar</a>
+      </form>
+
+      <form method="post" action="{% url 'people:excluir_lote' %}" id="form-excluir-lote">
+        {% csrf_token %}
+
+        <div class="toolbar">
+          {% if request.user|pode_incluir:"PESSOAS_CADASTRO" %}
+            <a href="/pessoas/nova/" class="btn btn-primary">+ Incluir Pessoa</a>
+          {% endif %}
+          {% if request.user|pode_excluir:"PESSOAS_CADASTRO" %}
+            <button
+              type="submit"
+              id="btn-excluir-selecionados"
+              class="btn btn-red"
+              disabled
+              onclick="return confirmarExclusaoSelecionados();"
+            >
+              Excluir
+            </button>
+          {% endif %}
+          <a href="/pessoas/exportar/excel/{% if querystring %}?{{ querystring }}{% endif %}" class="btn btn-green">Exportar Excel (.xlsx)</a>
+          <a href="/pessoas/exportar/pdf/{% if querystring %}?{{ querystring }}{% endif %}" class="btn btn-dark">Exportar PDF</a>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="col-sel" title="Selecionar todos">
+                  <input type="checkbox" id="chk-todos" class="chk-input">
+                </th>
+                <th class="col-sel">SEL</th>
+                <th>ID</th>
+                <th>NOME</th>
+                <th>TELEFONE</th>
+                <th>ENDEREÇO</th>
+                <th>BAIRRO</th>
+                <th>ESTADO</th>
+                <th>DATA NASCIMENTO</th>
+                <th>CARGO</th>
+                <th>IDADE</th>
+                <th>DIZIMISTA</th>
+                <th>ATIVO</th>
+                {% if request.user|pode_alterar:"PESSOAS_CADASTRO" %}
+                  <th>AÇÕES</th>
+                {% endif %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in pessoas %}
+              <tr>
+                <td class="col-sel">
+                  <input
+                    type="checkbox"
+                    name="selecionados"
+                    value="{{ p.id }}"
+                    class="chk-input chk-pessoa"
+                    aria-label="Selecionar {{ p.nome_completo|default:p }}"
+                  >
+                </td>
+                <td class="col-sel">{{ forloop.counter }}</td>
+                <td>{{ p.id }}</td>
+                <td>{{ p.nome_completo|default:p }}</td>
+                <td>{{ p.telefone|default:"-" }}</td>
+                <td>{{ p.endereco|default:"-" }}</td>
+                <td>{{ p.bairro|default:"-" }}</td>
+                <td>{{ p.estado|default:"-" }}</td>
+                <td>{% if p.data_nascimento %}{{ p.data_nascimento|date:"d/m/Y" }}{% else %}-{% endif %}</td>
+                <td>{{ p.cargo|default:"-" }}</td>
+                <td>{{ p.idade|default:"-" }}</td>
+                <td>{% if p.dizimista %}Sim{% else %}Não{% endif %}</td>
+                <td>{% if p.ativo %}Sim{% else %}Não{% endif %}</td>
+                {% if request.user|pode_alterar:"PESSOAS_CADASTRO" %}
+                  <td><a href="/pessoas/{{ p.id }}/editar/" class="btn btn-blue btn-sm">Editar</a></td>
+                {% endif %}
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="{% if request.user|pode_alterar:'PESSOAS_CADASTRO' %}14{% else %}13{% endif %}">Nenhuma pessoa encontrada com os filtros atuais.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <script>
+    function toggleSubmenu(btn) {
+      const submenu = btn.nextElementSibling;
+      const arrow = btn.querySelector(".arrow");
+      if (!submenu) return;
+      submenu.classList.toggle("collapsed");
+      if (arrow) {
+        arrow.textContent = submenu.classList.contains("collapsed") ? "▸" : "▾";
+      }
+    }
+
+    function atualizarBotaoExcluir() {
+      const selecionados = document.querySelectorAll(".chk-pessoa:checked");
+      const todos = document.querySelectorAll(".chk-pessoa");
+      const btnExcluir = document.getElementById("btn-excluir-selecionados");
+      const chkTodos = document.getElementById("chk-todos");
+
+      if (btnExcluir) {
+        btnExcluir.disabled = selecionados.length === 0;
+      }
+
+      if (chkTodos && todos.length > 0) {
+        chkTodos.checked = selecionados.length === todos.length;
+        chkTodos.indeterminate = selecionados.length > 0 && selecionados.length < todos.length;
+      }
+    }
+
+    function confirmarExclusaoSelecionados() {
+      const qtd = document.querySelectorAll(".chk-pessoa:checked").length;
+      if (qtd === 0) return false;
+      return confirm("Tem certeza que deseja excluir " + qtd + " cadastro(s) selecionado(s)?");
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const chkTodos = document.getElementById("chk-todos");
+      const checkboxes = document.querySelectorAll(".chk-pessoa");
+
+      if (chkTodos) {
+        chkTodos.addEventListener("change", function () {
+          checkboxes.forEach((chk) => {
+            chk.checked = chkTodos.checked;
+          });
+          atualizarBotaoExcluir();
+        });
+      }
+
+      checkboxes.forEach((chk) => {
+        chk.addEventListener("change", atualizarBotaoExcluir);
+      });
+
+      atualizarBotaoExcluir();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ titulo_pagina }}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; }
+    body { display: flex; min-height: 100vh; background: #f4f6f9; color: #222; }
+    .sidebar { width: 250px; background: #1e2229; color: #fff; display: flex; flex-direction: column; flex-shrink: 0; }
+    .brand { padding: 16px; font-weight: bold; border-bottom: 1px solid #2e3440; font-size: 15px; }
+    .nav-title { padding: 10px 16px 6px; font-size: 11px; text-transform: uppercase; color: #9aa5b1; }
+    .nav-link { display: block; padding: 9px 24px; color: #e4e7eb; text-decoration: none; font-size: 14px; }
+    .nav-link:hover, .nav-link.active { background: #2d3748; color: #fff; }
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .topbar { background: #fff; padding: 14px 24px; border-bottom: 1px solid #d9e2ec; display: flex; justify-content: space-between; align-items: center; }
+    .content { padding: 20px 24px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 18px; }
+    .card { background: #fff; border-radius: 6px; padding: 14px 16px; border-left: 4px solid #2b6cb0; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .card.sucesso { border-left-color: #2f855a; }
+    .card.alerta { border-left-color: #c53030; }
+    .card-label { font-size: 12px; color: #616e7c; margin-bottom: 4px; }
+    .card-value { font-size: 20px; font-weight: bold; }
+    .filter-box { background: #fff; padding: 14px; border-radius: 6px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .filter-box input, .filter-box select { padding: 7px 10px; border: 1px solid #cbd5e0; border-radius: 4px; font-size: 13px; }
+    .toolbar { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+    .btn { padding: 8px 13px; border-radius: 4px; border: none; cursor: pointer; font-size: 13px; text-decoration: none; display: inline-block; color: #fff; }
+    .btn-primary { background: #c53030; }
+    .btn-blue { background: #2b6cb0; }
+    .btn-green { background: #2f855a; }
+    .btn-dark { background: #4a5568; }
+    .btn-sm { padding: 4px 9px; font-size: 12px; }
+    .table-wrap { background: #fff; border-radius: 6px; overflow-x: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { background: #2d3748; color: #fff; text-align: left; padding: 10px 12px; white-space: nowrap; }
+    td { padding: 9px 12px; border-bottom: 1px solid #edf2f7; }
+    tr:nth-child(even) td { background: #f9fbfd; }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">IBF — Gestão da Igreja</div>
+    <div class="nav-title">Principal</div>
+    <a class="nav-link" href="/">Painel Geral</a>
+    <a class="nav-link active" href="/pessoas/">Pessoas</a>
+    <div class="nav-title">Financeiro</div>
+    <a class="nav-link" href="/admin/finance/contareceber/">Contas a Receber</a>
+    <a class="nav-link" href="/admin/finance/contapagar/">Contas a Pagar</a>
+    <a class="nav-link" href="/admin/finance/fornecedor/">Fornecedores</a>
+    <div class="nav-title">Sistema</div>
+    <a class="nav-link" href="/admin/">Django Admin</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <h1>{{ titulo_pagina }}</h1>
+      <span>Usuário: {{ request.user.username }}</span>
+    </header>
+
+    <main class="content">
+      <div class="cards">
+        {% for c in cards %}
+        <div class="card {{ c.destaque }}">
+          <div class="card-label">{{ c.titulo }}</div>
+          <div class="card-value">{{ c.valor }}</div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <form method="get" class="filter-box">
+        <input type="text" name="q" value="{{ q }}" placeholder="Buscar por ID ou nome...">
+        <select name="dizimista">
+          <option value="">Dizimista (Todos)</option>
+          <option value="1" {% if dizimista == "1" %}selected{% endif %}>Dizimista: Sim</option>
+          <option value="0" {% if dizimista == "0" %}selected{% endif %}>Dizimista: Não</option>
+        </select>
+        <select name="ativo">
+          <option value="">Situação (Todas)</option>
+          <option value="1" {% if ativo == "1" %}selected{% endif %}>Ativo</option>
+          <option value="0" {% if ativo == "0" %}selected{% endif %}>Inativo</option>
+        </select>
+        <button type="submit" class="btn btn-blue">Filtrar</button>
+        <a href="/pessoas/" class="btn btn-dark">Limpar</a>
+      </form>
+
+      <div class="toolbar">
+        <a href="/pessoas/nova/" class="btn btn-primary">+ Incluir Pessoa</a>
+        <a href="/pessoas/exportar/excel/{% if querystring %}?{{ querystring }}{% endif %}" class="btn btn-green">Exportar Excel (.xlsx)</a>
+        <a href="/pessoas/exportar/pdf/{% if querystring %}?{{ querystring }}{% endif %}" class="btn btn-dark">Exportar PDF</a>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nome</th>
+              <th>Dizimista</th>
+              <th>Telefone</th>
+              <th>Responsável</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in pessoas %}
+            <tr>
+              <td>{{ p.id }}</td>
+              <td>{{ p.nome_completo|default:p }}</td>
+              <td>{% if p.dizimista %}Sim{% else %}Não{% endif %}</td>
+              <td>{{ p.telefone|default:p.celular|default:"-" }}</td>
+              <td>{{ p.responsavel|default:"-" }}</td>
+              <td><a href="/pessoas/{{ p.id }}/editar/" class="btn btn-blue btn-sm">Editar</a></td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6">Nenhuma pessoa encontrada com os filtros atuais.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

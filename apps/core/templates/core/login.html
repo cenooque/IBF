@@ -1,0 +1,279 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — Igreja Batista da Fama</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", Arial, Helvetica, sans-serif; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 20px;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(120deg, #041e42 0%, #064e9c 55%, #0095ff 100%);
+    }
+
+    /* Imagem da fachada ao fundo */
+    .bg-fachada {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Fundo decorativo/fachada */
+    .bg-overlay {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 42% 18%, rgba(125, 211, 252, 0.35), transparent 36%),
+        linear-gradient(90deg, rgba(3, 27, 66, 0.72) 0%, rgba(4, 78, 156, 0.52) 55%, rgba(0, 149, 255, 0.78) 100%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .card-login {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 410px;
+      background: rgba(255, 255, 255, 0.20);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 14px;
+      padding: 36px 34px 30px;
+      box-shadow: 0 20px 45px rgba(2, 18, 46, 0.45);
+    }
+
+    .title {
+      font-size: 30px;
+      font-weight: 800;
+      color: #0b2545;
+      line-height: 1.15;
+      display: block;
+      text-align: center;
+      border-bottom: 4px solid #0066ff;
+      padding-bottom: 6px;
+      margin: 0 auto 10px;
+      width: fit-content;
+    }
+
+    .title span {
+      color: #0066ff;
+    }
+
+    .subtitle {
+      font-size: 15px;
+      color: #1e293b;
+      margin-bottom: 24px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .input-group {
+      position: relative;
+      margin-bottom: 14px;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #475569;
+      font-size: 15px;
+      pointer-events: none;
+    }
+
+    .input-group input {
+      width: 100%;
+      height: 46px;
+      padding: 0 14px 0 42px;
+      border: 1px solid rgba(203, 213, 225, 0.9);
+      background: rgba(241, 245, 249, 0.78);
+      border-radius: 8px;
+      font-size: 14px;
+      color: #0f172a;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .input-group input:focus {
+      border-color: #0066ff;
+      background: rgba(255, 255, 255, 0.94);
+    }
+
+    .options-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12.5px;
+      color: #334155;
+      margin: 8px 0 22px;
+      gap: 8px;
+      font-weight: 500;
+    }
+
+    .remember-box {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .remember-box input {
+      width: 15px;
+      height: 15px;
+      accent-color: #0066ff;
+      cursor: pointer;
+    }
+
+    .forgot-link {
+      color: #0052cc;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .forgot-link:hover {
+      text-decoration: underline;
+    }
+
+    .btn-login {
+      width: 100%;
+      height: 48px;
+      border: 0;
+      border-radius: 9px;
+      background: linear-gradient(90deg, #003b99 0%, #0066ff 55%, #00a8ff 100%);
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 8px 18px rgba(0, 102, 255, 0.35);
+      transition: transform 0.15s, filter 0.15s;
+    }
+
+    .btn-login:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+    }
+
+    .divider-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 22px;
+      color: #475569;
+      font-size: 12px;
+    }
+
+    .divider-wrap::before,
+    .divider-wrap::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: rgba(100, 116, 139, 0.4);
+    }
+
+    .create-account {
+      color: #0052cc;
+      text-decoration: none;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .create-account:hover {
+      text-decoration: underline;
+    }
+
+    .error-msg {
+      background: rgba(254, 242, 242, 0.9);
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 14px;
+    }
+  </style>
+</head>
+<body>
+  <img src="{% static 'img/fachada_ibf.jpg' %}" alt="Igreja Batista da Fama" class="bg-fachada">
+  <div class="bg-overlay"></div>
+
+  <main class="card-login">
+    <h1 class="title">Olá, <span>Bem-Vindo!</span></h1>
+    <p class="subtitle">IGREJA BATISTA DA FAMA</p>
+
+    {% if form.errors %}
+      <div class="error-msg">
+        Usuário ou senha inválidos. Verifique seus dados e tente novamente.
+      </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'login' %}">
+      {% csrf_token %}
+      {% if next %}
+        <input type="hidden" name="next" value="{{ next }}">
+      {% endif %}
+
+      <div class="input-group">
+        <span class="input-icon">👤</span>
+        <input
+          type="text"
+          name="username"
+          id="id_username"
+          value="{{ form.username.value|default:'' }}"
+          placeholder="Email ou usuario"
+          autocomplete="username"
+          required
+          autofocus
+        >
+      </div>
+
+      <div class="input-group">
+        <span class="input-icon">🔒</span>
+        <input
+          type="password"
+          name="password"
+          id="id_password"
+          placeholder="Senha"
+          autocomplete="current-password"
+          required
+        >
+      </div>
+
+      <div class="options-row">
+        <label class="remember-box">
+          <input type="checkbox" name="remember_me" id="id_remember_me">
+          <span>Lembre-me</span>
+        </label>
+        <a href="/admin/password_reset/" class="forgot-link">Esqueceu sua senha?</a>
+      </div>
+
+      <button type="submit" class="btn-login">
+        <span>Login</span>
+        <span>→</span>
+      </button>
+
+      <div class="divider-wrap">
+        <a href="{% url 'core:usuario_criar' %}" class="create-account">Criar Nova Conta</a>
+      </div>
+    </form>
+  </main>
+</body>
+</html>

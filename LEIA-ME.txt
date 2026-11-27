@@ -1,0 +1,29 @@
+GESTAO DA IGREJA - PRIMEIRA ESTRUTURA DE MODELOS
+
+Este pacote contém os primeiros modelos Django para:
+- Pessoas e relacionamentos familiares
+- Contas financeiras
+- Centros de custo
+- Plano de contas
+
+IMPORTANTE:
+1. Faça backup de C:\IBF antes de substituir qualquer arquivo.
+2. Copie a pasta apps deste pacote para C:\IBF, mesclando pastas e substituindo
+   somente apps/people/models.py, apps/people/admin.py,
+   apps/finance/models.py e apps/finance/admin.py.
+3. Confirme que apps.people e apps.finance já estão em INSTALLED_APPS.
+4. Com o ambiente virtual ativo, execute:
+   python manage.py check
+   python manage.py makemigrations people finance
+   python manage.py migrate
+5. Acesse /admin/ e confira os cadastros.
+
+A modelagem familiar usa um cadastro Pessoa por indivíduo. O titular aponta para
+o cônjuge e filhos por RelacionamentoFamiliar; dados pessoais não são duplicados.
+
+Ainda NÃO inclui lançamentos, parcelas, recebimentos, pagamentos, transferências,
+conciliação, estornos ou auditoria financeira. Esses serão implementados na
+próxima etapa, depois de validar os cadastros-base.
+
+Observação: o Django admin é uma interface inicial de administração, não a
+interface final do Gestão da Igreja.

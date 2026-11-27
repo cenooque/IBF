@@ -1,0 +1,478 @@
+{% load acessos_tags %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ titulo_pagina }}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", Arial, Helvetica, sans-serif; }
+    body { background: #f4f6f9; color: #222; padding: 18px; }
+    .page-box { max-width: 1220px; margin: 0 auto; background: #fff; border: 1px solid #d9e2ec; border-radius: 6px; padding: 18px 22px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+    .page-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0; margin-bottom: 14px; gap: 12px; flex-wrap: wrap; }
+    .page-title { font-size: 19px; font-weight: 700; color: #1a202c; }
+    .top-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn { padding: 7px 14px; border-radius: 4px; border: 1px solid transparent; cursor: pointer; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; transition: background 0.15s ease; }
+    .btn-green { background: #2f855a; color: #fff; border-color: #276749; }
+    .btn-green:hover { background: #276749; }
+    .btn-red { background: #c53030; color: #fff; border-color: #9b2c2c; }
+    .btn-red:hover { background: #9b2c2c; }
+    .btn-light { background: #edf2f7; color: #2d3748; border-color: #cbd5e0; }
+    .btn-light:hover { background: #e2e8f0; }
+
+    .section-toggle { font-size: 13.5px; font-weight: 700; color: #2d3748; cursor: pointer; user-select: none; margin: 4px 0 8px; display: inline-flex; align-items: center; gap: 6px; }
+    .section-divider { border: 0; border-top: 1px dashed #cbd5e0; margin-bottom: 14px; }
+
+    .top-split { display: grid; grid-template-columns: 1fr 1.15fr; gap: 14px; align-items: stretch; margin-bottom: 14px; }
+    .fieldset-box { border: 1px solid #cbd5e0; border-radius: 4px; padding: 10px 14px; background: #fafbfd; }
+    .fieldset-box.compact { margin-bottom: 0; display: flex; flex-direction: column; justify-content: center; }
+    .fieldset-box legend { font-size: 12px; color: #4a5568; padding: 0 6px; font-weight: 700; }
+
+    .flags-row { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; }
+    .flag-item { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #2d3748; cursor: pointer; font-weight: 600; }
+    .flag-item input[type="checkbox"] { width: 15px; height: 15px; cursor: pointer; accent-color: #2b6cb0; }
+
+    .foto-box { display: flex; align-items: center; gap: 14px; }
+    .foto-preview {
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      border: 2px solid #cbd5e0;
+      background: #edf2f7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: #4a5568;
+      text-align: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .foto-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .foto-info { flex: 1; min-width: 0; }
+    .foto-info input[type="file"] { width: 100%; font-size: 12px; color: #2d3748; }
+
+    /* Linha 1: Nome flexível + 4 campos padronizados (Sexo, Nasc, Batismo, Cargo) */
+    .grid-linha-1 {
+      display: grid;
+      grid-template-columns: minmax(220px, 1.5fr) repeat(4, 165px);
+      gap: 12px 14px;
+      margin-bottom: 14px;
+      align-items: start;
+    }
+
+    .grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px 14px; margin-bottom: 14px; align-items: start; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 14px; margin-bottom: 14px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; margin-bottom: 14px; }
+    .grid-city-uf-cep {
+      display: grid;
+      grid-template-columns: minmax(200px, 1.5fr) 165px minmax(180px, 1fr);
+      gap: 12px 14px;
+      margin-bottom: 14px;
+      align-items: start;
+    }
+
+    .field-group { display: flex; flex-direction: column; min-width: 0; }
+    .field-group.full-width { grid-column: 1 / -1; }
+
+    /* Mesma largura padrão do campo Sexo (165px) */
+    .field-group.same-as-sexo input,
+    .field-group.same-as-sexo select {
+      width: 165px;
+      max-width: 100%;
+    }
+    .field-group.uf-field input,
+    .field-group.uf-field select {
+      text-transform: uppercase;
+    }
+
+    .field-group label { font-size: 12px; font-weight: 600; color: #2d3748; margin-bottom: 4px; }
+    .field-group input[type="text"],
+    .field-group input[type="number"],
+    .field-group input[type="email"],
+    .field-group input[type="date"],
+    .field-group select,
+    .field-group textarea {
+      width: 100%;
+      height: 35px;
+      padding: 5px 10px;
+      border: 1px solid #cbd5e0;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #1a202c;
+      background: #fff;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .field-group input:focus,
+    .field-group select:focus,
+    .field-group textarea:focus {
+      outline: none;
+      border-color: #3182ce;
+      box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.15);
+    }
+    .field-group input[readonly] {
+      background: #edf2f7;
+      color: #2d3748;
+      font-weight: 700;
+    }
+    .field-group textarea { height: auto; min-height: 76px; resize: vertical; }
+
+    .filhos-box {
+      min-height: 35px;
+      padding: 6px 10px;
+      border: 1px solid #cbd5e0;
+      border-radius: 4px;
+      background: #f8fafc;
+      font-size: 13px;
+      color: #1a202c;
+    }
+    .filhos-lista {
+      list-style: disc inside;
+      margin: 0;
+      padding: 0;
+    }
+    .filhos-lista li {
+      padding: 1px 0;
+    }
+    .filhos-vazio {
+      color: #718096;
+      font-size: 12px;
+    }
+
+    .error-list { color: #c53030; font-size: 11.5px; margin-top: 2px; }
+    .error-list ul { list-style: none; }
+    .hint-text { font-size: 11px; color: #718096; margin-top: 3px; line-height: 1.3; }
+    .hidden { display: none !important; }
+
+    @media (max-width: 1120px) {
+      .grid-linha-1 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .field-group.same-as-sexo input,
+      .field-group.same-as-sexo select { width: 100%; }
+    }
+    @media (max-width: 860px) {
+      .top-split, .grid-linha-1, .grid-4, .grid-3, .grid-2, .grid-city-uf-cep { grid-template-columns: 1fr; }
+      .field-group.same-as-sexo input,
+      .field-group.same-as-sexo select { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-box">
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+
+      <div class="page-header">
+        <h1 class="page-title">{{ titulo_pagina }}</h1>
+        <div class="top-actions">
+          {% if pessoa %}
+            {% if request.user|pode_alterar:"PESSOAS_CADASTRO" %}
+              <button type="submit" class="btn btn-green">Salvar</button>
+            {% endif %}
+            {% if request.user|pode_excluir:"PESSOAS_CADASTRO" %}
+              <button
+                type="submit"
+                formaction="{% url 'people:excluir' pessoa.pk %}"
+                formmethod="post"
+                class="btn btn-red"
+                onclick="return confirm('Tem certeza que deseja excluir {{ pessoa.nome_completo|escapejs }}?');"
+              >
+                Excluir
+              </button>
+            {% endif %}
+          {% else %}
+            {% if request.user|pode_incluir:"PESSOAS_CADASTRO" %}
+              <button type="submit" class="btn btn-green">Salvar</button>
+            {% endif %}
+          {% endif %}
+          {% if request.user|pode_ver:"PESSOAS_CADASTRO" %}
+            <a href="/pessoas/" class="btn btn-light">Voltar para Lista</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="section-toggle" onclick="toggleSection('geral-body', this)">
+        <span>▾</span> Geral
+      </div>
+      <hr class="section-divider">
+
+      <div id="geral-body">
+        {% if form.non_field_errors %}
+          <div class="error-list" style="margin-bottom: 12px;">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <!-- Opções (Esquerda) + Foto (Direita) -->
+        <div class="top-split">
+          <fieldset class="fieldset-box compact">
+            <legend>Opções</legend>
+            <div class="flags-row">
+              <label class="flag-item" for="{{ form.ativo.id_for_label }}">
+                {{ form.ativo }} <span>Ativo</span>
+              </label>
+              <label class="flag-item" for="{{ form.dizimista.id_for_label }}">
+                {{ form.dizimista }} <span>Dizimista</span>
+              </label>
+              <label class="flag-item" for="{{ form.eh_crianca.id_for_label }}">
+                {{ form.eh_crianca }} <span>Criança</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="fieldset-box compact">
+            <legend>Foto</legend>
+            <div class="foto-box">
+              <div class="foto-preview">
+                {% if pessoa and pessoa.foto %}
+                  <img src="{{ pessoa.foto.url }}" alt="Foto de {{ pessoa.nome_completo }}">
+                {% else %}
+                  <span>Sem foto</span>
+                {% endif %}
+              </div>
+              <div class="foto-info">
+                {% if pessoa and pessoa.pk %}
+                  {% if form.foto %}
+                    {{ form.foto }}
+                  {% else %}
+                    <input type="file" name="foto" id="id_foto" accept="image/*">
+                  {% endif %}
+                  <div class="hint-text">Salva no servidor com o ID #{{ pessoa.pk }}.</div>
+                  {% if form.foto %}<div class="error-list">{{ form.foto.errors }}</div>{% endif %}
+                {% else %}
+                  <div class="hint-text" style="margin-top: 0;">
+                    Salve o cadastro primeiro e depois edite para anexar a foto com o ID.
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </fieldset>
+        </div>
+
+        <!-- 1. Nome Completo | Sexo | Data de Nascimento | Data Batismo | Cargo -->
+        <div class="grid-linha-1">
+          <div class="field-group">
+            <label for="{{ form.nome_completo.id_for_label }}">{{ form.nome_completo.label }}</label>
+            {{ form.nome_completo }}
+            <div class="error-list">{{ form.nome_completo.errors }}</div>
+          </div>
+
+          <div class="field-group same-as-sexo">
+            <label for="{{ form.sexo.id_for_label }}">{{ form.sexo.label }}</label>
+            {{ form.sexo }}
+            <div class="error-list">{{ form.sexo.errors }}</div>
+          </div>
+
+          <div class="field-group same-as-sexo">
+            <label for="{{ form.data_nascimento.id_for_label }}">{{ form.data_nascimento.label }}</label>
+            {{ form.data_nascimento }}
+            <div class="error-list">{{ form.data_nascimento.errors }}</div>
+          </div>
+
+          <div class="field-group same-as-sexo">
+            <label for="{{ form.data_batismo.id_for_label }}">{{ form.data_batismo.label }}</label>
+            {{ form.data_batismo }}
+            <div class="error-list">{{ form.data_batismo.errors }}</div>
+          </div>
+
+          <div class="field-group same-as-sexo">
+            <label for="{{ form.cargo.id_for_label }}">{{ form.cargo.label }}</label>
+            {{ form.cargo }}
+            <div class="error-list">{{ form.cargo.errors }}</div>
+          </div>
+        </div>
+
+        <!-- 2. Estado Civil | Cônjuge | Filho(a)(s) | Situação -->
+        <div class="grid-4">
+          <div class="field-group">
+            <label for="{{ form.estado_civil.id_for_label }}">{{ form.estado_civil.label }}</label>
+            {{ form.estado_civil }}
+            <div class="error-list">{{ form.estado_civil.errors }}</div>
+          </div>
+
+          <div class="field-group">
+            <label for="{{ form.conjuge.id_for_label }}">{{ form.conjuge.label }}</label>
+            {{ form.conjuge }}
+            <span class="hint-text">Vínculo espelhado automaticamente entre os cônjuges.</span>
+            <div class="error-list">{{ form.conjuge.errors }}</div>
+          </div>
+
+          <div class="field-group">
+            <label>Filho(a)(s)</label>
+            <div class="filhos-box">
+              {% if filhos %}
+                <ul class="filhos-lista">
+                  {% for filho in filhos %}
+                    <li>{{ filho.nome_completo }}</li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <span class="filhos-vazio">Nenhum filho vinculado.</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="{{ form.situacao_igreja.id_for_label }}">{{ form.situacao_igreja.label }}</label>
+            {{ form.situacao_igreja }}
+            <div class="error-list">{{ form.situacao_igreja.errors }}</div>
+          </div>
+        </div>
+
+        <!-- 3. E-mail | Telefone -->
+        <div class="grid-2">
+          <div class="field-group">
+            <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+            {{ form.email }}
+            <div class="error-list">{{ form.email.errors }}</div>
+          </div>
+
+          <div class="field-group">
+            <label for="{{ form.telefone.id_for_label }}">{{ form.telefone.label }}</label>
+            {{ form.telefone }}
+            <div class="error-list">{{ form.telefone.errors }}</div>
+          </div>
+        </div>
+
+        <!-- Bloco Criança (Acima de Endereço): Idade | Pai | Mãe -->
+        <fieldset class="fieldset-box hidden" id="box-crianca-info" style="margin-bottom: 14px;">
+          <legend>Dados da Criança — Idade e Filiação</legend>
+          <div class="grid-3" style="margin-bottom: 0;">
+            <div class="field-group">
+              <label for="idade_calculada">Idade (Cálculo Automático)</label>
+              <input type="text" id="idade_calculada" readonly placeholder="Informe a data de nascimento">
+            </div>
+
+            <div class="field-group">
+              <label for="{{ form.pai.id_for_label }}">{{ form.pai.label }}</label>
+              {{ form.pai }}
+              <div class="error-list">{{ form.pai.errors }}</div>
+            </div>
+
+            <div class="field-group">
+              <label for="{{ form.mae.id_for_label }}">{{ form.mae.label }}</label>
+              {{ form.mae }}
+              <div class="error-list">{{ form.mae.errors }}</div>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- 4. Endereço | Complemento | Bairro -->
+        <div class="grid-3">
+          <div class="field-group">
+            <label for="{{ form.endereco.id_for_label }}">{{ form.endereco.label }}</label>
+            {{ form.endereco }}
+            <div class="error-list">{{ form.endereco.errors }}</div>
+          </div>
+
+          <div class="field-group">
+            <label for="{{ form.complemento.id_for_label }}">{{ form.complemento.label }}</label>
+            {{ form.complemento }}
+            <div class="error-list">{{ form.complemento.errors }}</div>
+          </div>
+
+          <div class="field-group">
+            <label for="{{ form.bairro.id_for_label }}">{{ form.bairro.label }}</label>
+            {{ form.bairro }}
+            <div class="error-list">{{ form.bairro.errors }}</div>
+          </div>
+        </div>
+
+        <!-- 5. Cidade | Estado (UF) | CEP -->
+        <div class="grid-city-uf-cep">
+          <div class="field-group">
+            <label for="{{ form.cidade.id_for_label }}">{{ form.cidade.label }}</label>
+            {{ form.cidade }}
+            <div class="error-list">{{ form.cidade.errors }}</div>
+          </div>
+
+          <div class="field-group same-as-sexo uf-field">
+            <label for="{{ form.estado.id_for_label }}">{{ form.estado.label }}</label>
+            {{ form.estado }}
+            <div class="error-list">{{ form.estado.errors }}</div>
+          </div>
+
+          <div class="field-group">
+            <label for="{{ form.cep.id_for_label }}">{{ form.cep.label }}</label>
+            {{ form.cep }}
+            <div class="error-list">{{ form.cep.errors }}</div>
+          </div>
+        </div>
+
+        <!-- 6. Observações -->
+        <div class="grid-3" style="margin-bottom: 0;">
+          <div class="field-group full-width">
+            <label for="{{ form.observacoes.id_for_label }}">{{ form.observacoes.label }}</label>
+            {{ form.observacoes }}
+            <div class="error-list">{{ form.observacoes.errors }}</div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    function toggleSection(id, trigger) {
+      const el = document.getElementById(id);
+      const arrow = trigger.querySelector("span");
+      el.classList.toggle("hidden");
+      arrow.textContent = el.classList.contains("hidden") ? "▸" : "▾";
+    }
+
+    function calcularIdade() {
+      const inputNasc = document.getElementById("{{ form.data_nascimento.id_for_label }}");
+      const inputIdade = document.getElementById("idade_calculada");
+      if (!inputNasc || !inputIdade || !inputNasc.value) {
+        if (inputIdade) inputIdade.value = "";
+        return;
+      }
+
+      const partes = inputNasc.value.split("-");
+      if (partes.length !== 3) return;
+
+      const anoNasc = parseInt(partes[0], 10);
+      const mesNasc = parseInt(partes[1], 10) - 1;
+      const diaNasc = parseInt(partes[2], 10);
+
+      const hoje = new Date();
+      let anos = hoje.getFullYear() - anoNasc;
+      const m = hoje.getMonth() - mesNasc;
+      if (m < 0 || (m === 0 && hoje.getDate() < diaNasc)) {
+        anos--;
+      }
+
+      if (anos < 0) {
+        inputIdade.value = "Data futura";
+      } else if (anos === 0) {
+        let meses = (hoje.getFullYear() - anoNasc) * 12 + (hoje.getMonth() - mesNasc);
+        if (hoje.getDate() < diaNasc) meses--;
+        inputIdade.value = Math.max(meses, 0) + " mês(es) (" + (hoje.getFullYear() - anoNasc) + " no ano)";
+      } else {
+        inputIdade.value = anos + " ano(s)";
+      }
+    }
+
+    function atualizarModoCrianca() {
+      const chkCrianca = document.getElementById("{{ form.eh_crianca.id_for_label }}");
+      const boxCrianca = document.getElementById("box-crianca-info");
+
+      if (!chkCrianca || !boxCrianca) return;
+
+      if (chkCrianca.checked) {
+        boxCrianca.classList.remove("hidden");
+        calcularIdade();
+      } else {
+        boxCrianca.classList.add("hidden");
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const chkCrianca = document.getElementById("{{ form.eh_crianca.id_for_label }}");
+      const inputNasc = document.getElementById("{{ form.data_nascimento.id_for_label }}");
+
+      if (chkCrianca) chkCrianca.addEventListener("change", atualizarModoCrianca);
+      if (inputNasc) inputNasc.addEventListener("change", calcularIdade);
+
+      atualizarModoCrianca();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+{% load acessos_tags %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ titulo_pagina }}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", Arial, Helvetica, sans-serif; }
+    body { background: #eceff1; color: #263238; display: flex; min-height: 100vh; font-size: 13px; }
+    .sidebar { width: 235px; background: #212529; color: #cfd8dc; display: flex; flex-direction: column; flex-shrink: 0; }
+    .brand { background: #181a1d; color: #fff; padding: 12px 14px; font-weight: 700; font-size: 14px; border-bottom: 1px solid #2c3136; }
+    .nav-group-title { font-size: 11px; text-transform: uppercase; color: #90a4ae; padding: 10px 14px 4px; font-weight: 700; }
+    .nav-list { list-style: none; }
+    .nav-list a { display: block; padding: 8px 14px; color: #cfd8dc; text-decoration: none; font-size: 13px; }
+    .nav-list a:hover, .nav-list a.active { background: #c62828; color: #fff; }
+    .sidebar-footer { margin-top: auto; border-top: 1px solid #2c3136; padding: 10px 14px; }
+    .btn-logout { width: 100%; padding: 7px 10px; background: #37474f; color: #fff; border: 0; border-radius: 3px; cursor: pointer; font-weight: 600; }
+    .btn-logout:hover { background: #c62828; }
+
+    .main-wrap { flex: 1; display: flex; flex-direction: column; }
+    .topbar { background: #343a40; color: #fff; padding: 6px 14px; font-size: 12px; }
+    .content { padding: 16px 20px; background: #fff; flex: 1; }
+    .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 10px; flex-wrap: wrap; }
+    .header-row h1 { font-size: 20px; font-weight: 500; }
+    .btn-new { background: #b71c1c; color: #fff; text-decoration: none; padding: 7px 14px; border-radius: 3px; font-weight: 600; font-size: 12px; }
+    .filter-form { display: flex; gap: 8px; margin-bottom: 12px; }
+    .filter-form input { padding: 5px 8px; border: 1px solid #ced4da; border-radius: 3px; width: 250px; font-size: 12px; }
+    .btn-dark { background: #2c3034; color: #fff; border: 0; padding: 6px 12px; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: 600; }
+
+    table { width: 100%; border-collapse: collapse; border: 1px solid #dee2e6; font-size: 12px; }
+    thead th { background: #2c3034; color: #fff; padding: 8px; text-align: left; }
+    tbody td { padding: 7px 8px; border-bottom: 1px solid #e9ecef; }
+    .link-acao { color: #1565c0; text-decoration: none; font-weight: 600; margin-right: 10px; }
+  </style>
+</head>
+<body>
+  {% if request.user.is_superuser or request.user|pode_ver:"PAINEL_GERAL" or request.user|pode_ver:"PESSOAS_CADASTRO" or request.user|pode_ver:"CARGOS_CADASTRO" or request.user|pode_ver:"CONTAS_RECEBER" or request.user|pode_ver:"CONTAS_PAGAR" or request.user|pode_ver:"FORNECEDORES" or request.user|pode_ver:"USUARIOS_CADASTRO" or request.user|pode_ver:"LIBERACAO_ACESSOS" %}
+    <aside class="sidebar">
+      <div class="brand">IBF — Gestão da Igreja</div>
+
+      {% if request.user|pode_ver:"PAINEL_GERAL" or request.user|pode_ver:"PESSOAS_CADASTRO" or request.user|pode_ver:"CARGOS_CADASTRO" %}
+        <div class="nav-group-title">Principal</div>
+        <ul class="nav-list">
+          {% if request.user|pode_ver:"PAINEL_GERAL" %}
+            <li><a href="/">Painel Geral</a></li>
+          {% endif %}
+          {% if request.user|pode_ver:"PESSOAS_CADASTRO" %}
+            <li><a href="{% url 'people:lista' %}">Cadastro de Pessoas</a></li>
+          {% endif %}
+          {% if request.user|pode_ver:"CARGOS_CADASTRO" %}
+            <li><a href="{% url 'people:cargo_lista' %}">Cargos</a></li>
+          {% endif %}
+        </ul>
+      {% endif %}
+
+      {% if request.user.is_superuser or request.user|pode_ver:"USUARIOS_CADASTRO" or request.user|pode_ver:"LIBERACAO_ACESSOS" %}
+        <div class="nav-group-title">Sistema</div>
+        <ul class="nav-list">
+          {% if request.user|pode_ver:"USUARIOS_CADASTRO" %}
+            <li><a href="{% url 'core:usuario_lista' %}" class="active">Usuário</a></li>
+          {% endif %}
+          {% if request.user|pode_ver:"LIBERACAO_ACESSOS" %}
+            <li><a href="{% url 'core:liberacao_acessos' %}">Liberação de Acessos</a></li>
+          {% endif %}
+          {% if request.user.is_superuser %}
+            <li><a href="/admin/">Django Admin</a></li>
+          {% endif %}
+        </ul>
+      {% endif %}
+
+      <div class="sidebar-footer">
+        {% if user.is_authenticated %}
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-logout">Sair ({{ user.username }})</button>
+          </form>
+        {% endif %}
+      </div>
+    </aside>
+  {% endif %}
+
+  <div class="main-wrap">
+    <div class="topbar">Sistema / Usuário</div>
+    <div class="content">
+      <div class="header-row">
+        <h1>Usuários</h1>
+        {% if request.user|pode_incluir:"USUARIOS_CADASTRO" %}
+          <a href="{% url 'core:usuario_criar' %}" class="btn-new">+ Novo Usuário</a>
+        {% endif %}
+      </div>
+
+      <form method="get" class="filter-form">
+        <input type="text" name="q" value="{{ busca }}" placeholder="Buscar por usuário, nome ou e-mail...">
+        <button type="submit" class="btn-dark">Filtrar</button>
+      </form>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 70px;">ID</th>
+            <th>Usuário</th>
+            <th>Nome</th>
+            <th>E-mail</th>
+            <th style="width: 80px;">Ativo</th>
+            {% if request.user|pode_alterar:"USUARIOS_CADASTRO" or request.user|pode_ver:"LIBERACAO_ACESSOS" %}
+              <th style="width: 190px;">Ações</th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in usuarios %}
+            <tr>
+              <td>{{ u.pk|stringformat:"04d" }}</td>
+              <td>{{ u.username }}</td>
+              <td>{{ u.get_full_name|default:"-" }}</td>
+              <td>{{ u.email|default:"-" }}</td>
+              <td>{% if u.is_active %}Sim{% else %}Não{% endif %}</td>
+              {% if request.user|pode_alterar:"USUARIOS_CADASTRO" or request.user|pode_ver:"LIBERACAO_ACESSOS" %}
+                <td>
+                  {% if request.user|pode_alterar:"USUARIOS_CADASTRO" %}
+                    <a href="{% url 'core:usuario_editar' u.pk %}" class="link-acao">Editar</a>
+                  {% endif %}
+                  {% if request.user|pode_ver:"LIBERACAO_ACESSOS" %}
+                    <a href="{% url 'core:liberacao_acessos' %}?usuario={{ u.pk }}" class="link-acao">Acessos</a>
+                  {% endif %}
+                </td>
+              {% endif %}
+            </tr>
+          {% empty %}
+            <tr><td colspan="{% if request.user|pode_alterar:'USUARIOS_CADASTRO' or request.user|pode_ver:'LIBERACAO_ACESSOS' %}6{% else %}5{% endif %}" style="text-align:center; padding: 12px;">Nenhum usuário encontrado.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

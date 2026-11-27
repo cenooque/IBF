@@ -1,0 +1,29 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h1>Relatório de pessoas e membros</h1>
+<form method="get">
+  <label for="situacao">Vínculo com a igreja:</label>
+  <select name="situacao" id="situacao">
+    <option value="">Todos</option>
+    {% for valor, rotulo in situacoes %}
+      <option value="{{ valor }}" {% if situacao_selecionada == valor %}selected{% endif %}>{{ rotulo }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit">Filtrar</button>
+</form>
+<table>
+  <thead><tr><th>Nome</th><th>Vínculo</th><th>Telefone</th><th>Cidade</th></tr></thead>
+  <tbody>
+  {% for pessoa in pessoas %}
+    <tr>
+      <td>{{ pessoa.nome_completo }}</td>
+      <td>{{ pessoa.get_situacao_igreja_display }}</td>
+      <td>{{ pessoa.telefone|default:"—" }}</td>
+      <td>{{ pessoa.cidade|default:"—" }}</td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="4">Nenhuma pessoa encontrada.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

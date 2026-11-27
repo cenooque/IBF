@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ titulo_pagina }}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; }
+    body { background: #f4f6f9; color: #222; padding: 24px; }
+    .box { max-width: 780px; margin: 0 auto; background: #fff; padding: 24px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    h1 { font-size: 20px; margin-bottom: 18px; }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 5px; }
+    .field input[type="text"], .field input[type="date"], .field input[type="email"], .field select, .field textarea {
+      width: 100%; padding: 8px 10px; border: 1px solid #cbd5e0; border-radius: 4px; font-size: 13px;
+    }
+    .actions { margin-top: 20px; display: flex; gap: 10px; }
+    .btn { padding: 9px 16px; border-radius: 4px; border: none; cursor: pointer; font-size: 13px; text-decoration: none; color: #fff; }
+    .btn-green { background: #2f855a; }
+    .btn-dark { background: #4a5568; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>{{ titulo_pagina }}</h1>
+    <form method="post">
+      {% csrf_token %}
+      {% for field in form %}
+      <div class="field">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}<div style="color:#c53030;font-size:12px;margin-top:4px;">{{ field.errors }}</div>{% endif %}
+      </div>
+      {% endfor %}
+      <div class="actions">
+        <button type="submit" class="btn btn-green">Salvar</button>
+        <a href="/pessoas/" class="btn btn-dark">Voltar para Lista</a>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

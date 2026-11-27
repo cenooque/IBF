@@ -1,0 +1,7 @@
+.env\n.venv/\n__pycache__/\n*.py[cod]\ndata/*.sqlite3*\nstaticfiles/\nmedia/\n
+# Arquivos locais e segredos
+.env
+*.sqlite3
+
+.env
+*.sqlite3
